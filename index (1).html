@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Company Parameter Calculator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg:        #F8F9FA;
+      --surface:   #FFFFFF;
+      --surface2:  #F1F3F5;
+      --border:    #DEE2E6;
+      --text:      #0F172A;
+      --muted:     #495057;
+      --subtle:    #868E96;
+      --accent:    #1C4ED8;
+      --accent2:   #0369A1;
+      --gold:      #B45309;
+      --success:   #15803D;
+      --warning:   #B45309;
+      --danger:    #B91C1C;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.10);
+      --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+      --radius:    10px;
+      --transition: 200ms ease;
+    }
+
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body {
+      font-family: 'IBM Plex Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── Header ──────────────────────────────────────────────── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 50;
+      box-shadow: var(--shadow-sm);
+    }
+    .header-inner {
+      max-width: 1100px; margin: 0 auto;
+      padding: 0 1.5rem;
+      height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .logo {
+      display: flex; align-items: center; gap: 0.6rem;
+      font-size: 1.05rem; font-weight: 700; color: var(--text);
+      text-decoration: none; letter-spacing: -0.02em;
+    }
+    .logo-icon {
+      width: 32px; height: 32px;
+      background: var(--accent);
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .logo-icon svg { width: 18px; height: 18px; stroke: #fff; fill: none; stroke-width: 2; }
+    .header-badge {
+      font-size: 0.72rem; font-weight: 500;
+      background: #EFF6FF; color: var(--accent);
+      border: 1px solid #BFDBFE;
+      border-radius: 100px;
+      padding: 0.2rem 0.7rem;
+      letter-spacing: 0.03em;
+    }
+
+    /* ── Main ────────────────────────────────────────────────── */
+    main { max-width: 1100px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
+
+    /* ── Page Title ──────────────────────────────────────────── */
+    .page-title {
+      margin-bottom: 2.5rem;
+      opacity: 0; transform: translateY(16px);
+      animation: fadeUp 0.5s ease 0.1s forwards;
+    }
+    .page-title h1 {
+      font-size: clamp(1.5rem, 3.5vw, 2rem);
+      font-weight: 700; letter-spacing: -0.03em;
+      line-height: 1.2;
+    }
+    .page-title p { color: var(--muted); margin-top: 0.4rem; font-size: 0.95rem; }
+
+    /* ── Tab Nav ─────────────────────────────────────────────── */
+    .tab-nav {
+      display: flex; gap: 0.25rem; flex-wrap: wrap;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.3rem;
+      margin-bottom: 2rem;
+      opacity: 0; animation: fadeUp 0.5s ease 0.2s forwards;
+    }
+    .tab-btn {
+      padding: 0.5rem 1.1rem;
+      border: none; background: transparent;
+      font-family: inherit; font-size: 0.85rem; font-weight: 500;
+      color: var(--muted); border-radius: 7px;
+      cursor: pointer;
+      transition: background var(--transition), color var(--transition), box-shadow var(--transition);
+      white-space: nowrap;
+    }
+    .tab-btn:hover { color: var(--text); background: rgba(255,255,255,0.7); }
+    .tab-btn.active {
+      background: var(--surface);
+      color: var(--accent);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* ── Panel ───────────────────────────────────────────────── */
+    .panel { display: none; }
+    .panel.active { display: block; animation: fadeUp 0.3s ease forwards; }
+
+    /* ── Calculator Card ─────────────────────────────────────── */
+    .calc-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+      transition: box-shadow var(--transition);
+    }
+    .calc-card:hover { box-shadow: var(--shadow-md); }
+
+    .calc-header {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 1.1rem 1.4rem;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      user-select: none;
+    }
+    .calc-icon {
+      width: 36px; height: 36px; flex-shrink: 0;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .calc-icon svg { width: 18px; height: 18px; stroke-width: 1.8; fill: none; }
+    .calc-title { font-size: 0.95rem; font-weight: 600; flex: 1; }
+    .calc-subtitle { font-size: 0.78rem; color: var(--subtle); margin-top: 0.05rem; }
+    .chevron {
+      width: 18px; height: 18px; stroke: var(--subtle); fill: none; stroke-width: 2;
+      transition: transform 0.25s ease;
+    }
+    .calc-card.open .chevron { transform: rotate(180deg); }
+
+    .calc-body {
+      padding: 1.4rem;
+      display: none;
+    }
+    .calc-card.open .calc-body { display: block; animation: fadeUp 0.2s ease forwards; }
+
+    /* ── Form ────────────────────────────────────────────────── */
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.2rem;
+    }
+    .field { display: flex; flex-direction: column; gap: 0.35rem; }
+    .field label {
+      font-size: 0.78rem; font-weight: 600;
+      color: var(--muted); letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+    .field input, .field select {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 0.65rem 0.85rem;
+      font-family: inherit; font-size: 0.92rem; color: var(--text);
+      outline: none;
+      transition: border-color var(--transition), box-shadow var(--transition);
+      -moz-appearance: textfield;
+    }
+    .field input::-webkit-outer-spin-button,
+    .field input::-webkit-inner-spin-button { -webkit-appearance: none; }
+    .field input:focus, .field select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(28,78,216,0.1);
+      background: #fff;
+    }
+    .field input::placeholder { color: var(--subtle); }
+
+    .calc-btn {
+      padding: 0.65rem 1.6rem;
+      background: var(--accent);
+      color: #fff; font-family: inherit; font-size: 0.88rem; font-weight: 600;
+      border: none; border-radius: 7px;
+      cursor: pointer;
+      transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+    }
+    .calc-btn:hover {
+      background: #1741B5;
+      box-shadow: 0 4px 12px rgba(28,78,216,0.3);
+      transform: translateY(-1px);
+    }
+    .calc-btn:active { transform: translateY(0); }
+
+    /* ── Result Cards ────────────────────────────────────────── */
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 0.85rem;
+      margin-top: 1.2rem;
+    }
+    .result-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.1rem;
+      opacity: 0; transform: translateY(10px);
+      animation: none;
+    }
+    .result-card.show {
+      animation: popIn 0.3s ease forwards;
+    }
+    .result-label {
+      font-size: 0.72rem; font-weight: 600;
+      color: var(--subtle); text-transform: uppercase; letter-spacing: 0.05em;
+      margin-bottom: 0.35rem;
+    }
+    .result-value {
+      font-size: 1.5rem; font-weight: 700; letter-spacing: -0.03em;
+      line-height: 1.1;
+    }
+    .result-unit { font-size: 0.75rem; color: var(--subtle); margin-top: 0.2rem; }
+    .result-card.positive .result-value { color: var(--success); }
+    .result-card.negative .result-value { color: var(--danger); }
+    .result-card.neutral .result-value  { color: var(--accent);  }
+    .result-card.warning .result-value  { color: var(--warning); }
+
+    /* ── Section divider ─────────────────────────────────────── */
+    .section-label {
+      font-size: 0.72rem; font-weight: 700;
+      color: var(--subtle); text-transform: uppercase; letter-spacing: 0.1em;
+      margin: 2rem 0 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ── Tip box ─────────────────────────────────────────────── */
+    .tip {
+      font-size: 0.8rem; color: var(--muted);
+      background: #EFF6FF; border: 1px solid #BFDBFE;
+      border-radius: 7px; padding: 0.65rem 0.9rem;
+      margin-top: 0.9rem;
+      display: flex; gap: 0.5rem; align-items: flex-start;
+    }
+    .tip svg { flex-shrink: 0; margin-top: 1px; stroke: var(--accent); fill: none; stroke-width: 2; }
+
+    /* ── Animations ──────────────────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes popIn {
+      0%   { opacity: 0; transform: translateY(10px) scale(0.97); }
+      100% { opacity: 1; transform: translateY(0)    scale(1); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
+
+    /* ── Responsive ──────────────────────────────────────────── */
+    @media (max-width: 600px) {
+      main { padding: 1.5rem 1rem 3rem; }
+      .field-grid { grid-template-columns: 1fr; }
+      .result-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="header-inner">
+      <a href="#" class="logo">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        </div>
+        Company Parameters
+      </a>
+      <span class="header-badge">Internal Tool</span>
+    </div>
+  </header>
+
+  <main>
+    <div class="page-title">
+      <h1>Company Parameter Calculator</h1>
+      <p>Enter values to instantly calculate key business metrics across all departments.</p>
+    </div>
+
+    <!-- Tab Navigation -->
+    <nav class="tab-nav" role="tablist" aria-label="Calculator categories">
+      <button class="tab-btn active" role="tab" data-tab="financial" aria-selected="true">Financial</button>
+      <button class="tab-btn" role="tab" data-tab="hr" aria-selected="false">HR &amp; Headcount</button>
+      <button class="tab-btn" role="tab" data-tab="growth" aria-selected="false">Growth &amp; KPIs</button>
+    </nav>
+
+    <!-- ── FINANCIAL PANEL ─────────────────────────────────────── -->
+    <div class="panel active" id="panel-financial" role="tabpanel">
+
+      <p class="section-label">Profitability</p>
+
+      <!-- Profit Margin -->
+      <div class="calc-card open" id="card-margin">
+        <div class="calc-header" onclick="toggleCard('card-margin')" aria-expanded="true" tabindex="0" role="button">
+          <div class="calc-icon" style="background:#EFF6FF;">
+            <svg viewBox="0 0 24 24" style="stroke:#1C4ED8"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </div>
+          <div>
+            <div class="calc-title">Profit Margin</div>
+            <div class="calc-subtitle">Gross, Operating &amp; Net</div>
+          </div>
+          <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="calc-body">
+          <div class="field-grid">
+            <div class="field">
+              <label for="pm-revenue">Revenue ($)</label>
+              <input type="number" id="pm-revenue" placeholder="1,000,000" min="0" />
+            </div>
+            <div class="field">
+              <label for="pm-cogs">COGS ($)</label>
+              <input type="number" id="pm-cogs" placeholder="400,000" min="0" />
+            </div>
+            <div class="field">
+              <label for="pm-opex">Operating Expenses ($)</label>
+              <input type="number" id="pm-opex" placeholder="200,000" min="0" />
+            </div>
+            <div class="field">
+              <label for="pm-tax">Tax Rate (%)</label>
+              <input type="number" id="pm-tax" placeholder="21" min="0" max="100" />
+            </div>
+          </div>
+          <button class="calc-btn" onclick="calcMargin()">Calculate</button>
+          <div class="result-grid" id="res-margin"></div>
+          <div class="tip">
+            <svg viewBox="0 0 24 24" width="14" height="14"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Net Profit Margin = (Revenue − COGS − OpEx) × (1 − Tax) ÷ Revenue × 100
+          </div>
+        </div>
+      </div>
+
+      <!-- ROI -->
+      <div class="calc-card" id="card-roi">
+        <div class="calc-header" onclick="toggleCard('card-roi')" aria-expanded="false" tabindex="0" role="button">
+          <div class="calc-icon" style="background:#F0FDF4;">
+            <svg viewBox="0 0 24 24" style="stroke:#15803D"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+          </div>
+          <div>
+            <div class="calc-title">Return on Investment (ROI)</div>
+            <div class="calc-subtitle">Net return as % of investment cost</div>
+          </div>
+          <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="calc-body">
+          <div class="field-grid">
+            <div class="field">
+              <label for="roi-gain">Net Gain ($)</label>
+              <input type="number" id="roi-gain" placeholder="50,000" />
+            </div>
+            <div class="field">
+              <label for="roi-cost">Investment Cost ($)</label>
+              <input type="number" id="roi-cost" placeholder="200,000" min="0.01" />
+            </div>
+            <div class="field">
+              <label for="roi-months">Period (months)</label>
+              <input type="number" id="roi-months" placeholder="12" min="1" />
+            </div>
+          </div>
+          <button class="calc-btn" onclick="calcROI()">Calculate</button>
+          <div class="result-grid" id="res-roi"></div>
+        </div>
+      </div>
+
+      <!-- Break-Even -->
+      <div class="calc-card" id="card-breakeven">
+        <div class="calc-header" onclick="toggleCard('card-breakeven')" aria-expanded="false" tabindex="0" role="button">
+          <div class="calc-icon" style="background:#FFF7ED;">
+            <svg viewBox="0 0 24 24" style="stroke:#B45309"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </div>
+          <div>
+            <div class="calc-title">Break-Even Analysis</div>
+            <div class="calc-subtitle">Units &amp; revenue to cover fixed costs</div>
+          </div>
+          <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="calc-body">
+          <div class="field-grid">
+            <div class="field">
+              <label for="be-fixed">Fixed Costs ($)</label>
+              <input type="number" id="be-fixed" placeholder="100,000" min="0" />
+            </div>
+            <div class="field">
+              <label for="be-price">Price per Unit ($)</label>
+              <input type="number" id="be-price" placeholder="50" min="0.01" />
+            </div>
+            <div class="field">
+              <label for="be-vc">Variable Cost/Unit ($)</label>
+              <input type="number" id="be-vc" placeholder="20" min="0" />
+            </div>
+          </div>
+          <button class="calc-btn" onclick="calcBreakEven()">Calculate</button>
+          <div class="result-grid" id="res-breakeven"></div>
+        </div>
+      </div>
+
+      <p class="section-label">Efficiency</p>
+
+      <!-- EBITDA -->
+      <div class="calc-card" id="card-ebitda">
+        <div class="calc-header" onclick="toggleCard('card-ebitda')" aria-expanded="false" tabindex="0" role="button">
+          <div class="calc-icon" style="background:#F5F3FF;">
+            <svg viewBox="0 0 24 24" style="stroke:#6D28D9"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          </div>
+          <div>
+            <div class="calc-title">EBITDA &amp; EBITDA Margin</div>
+            <div class="calc-subtitle">Earnings before interest, tax, D&amp;A</div>
+          </div>
+          <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="calc-body">
+          <div class="field-grid">
+            <div class="field">
+              <label for="eb-revenue">Revenue ($)</label>
+              <input type="number" id="eb-revenue" placeholder="1,000,000" min="0" />
+            </div>
+            <div class="field">
+              <label for="eb-cogs">COGS ($)</label>
+              <input type="number" id="eb-cogs" placeholder="400,000" min="0" />
+            </div>
+            <div class="field">
+              <label for="eb-opex">OpEx ($)</label>
+              <input type="number" id="eb-opex" placeholder="150,000" min="0" />
+            </div>
+            <div class="field">
+              <label for="eb-da">Depreciation &amp; Amortization ($)</label>
+              <input type="number" id="eb-da" placeholder="30,000" min="0" />
+            </div>
+            <div class="field">
+              <label for="eb-interest">Interest ($)</label>
+              <input type="number" id="eb-interest" placeholder="10,000" min="0" />
+            </div>
+            <div class="field">
+              <label for="eb-tax2">Tax ($)</label>
+              <input type="number" id="eb-tax2" placeholder="50,000" min="0" />
+            </div>
+          </div>
+          <button class="calc-btn" onclick="calcEBITDA()">Calculate</button>
+          <div class="result-grid" id="res-ebitda"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── HR PANEL ────────────────────────────────────────────── -->
+    <div class="panel" id="panel-hr" role="tabpanel">
+
+      <p class="section-label">Workforce Cost</p>
+
+      <!-- Salary Cost -->
+      <div class="calc-card open" id="card-salary">
+        <div class="calc-header" onclick="toggleCard('card-salary')" aria-expanded="true" tabindex="0" role="button">
+          <div class="calc-icon" style="background:#F0FDF4;">
+            <svg viewBox="0 0 24 24" style="stroke:#15803D"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <div>
+            <div class="calc-title">Total Salary Cost</div>
+            <div class="calc-subtitle">Including benefits &amp; employer taxes</div>
+          </div>
+          <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="calc-body">
+          <div class="field-grid">
+            <div class="field">
+              <label for="sc-headcount">Headcount</label>
+              <input type="number" id="sc-headcount" placeholder="50" min="1" />
+            </div>
+            <div class="field">
+              <label for="sc-avg-salary">Avg Salary/Year ($)</label>
+              <input type="number" id="sc-avg-salary" placeholder="60,000" min="0" />
+            </div>
+            <div class="field">
+              <label for="sc-benefits">Benefits Overhead (%)</label>
+              <input type="number" id="sc-benefits" placeholder="25" min="0" max="100" />
+            </div>
+            <div class="field">
+              <label for="sc-employer-tax">Employer Tax (%)</label>
+              <input type="number" id="sc-employer-tax" placeholder="7.65" min="0" max="100" />
+            </div>
+          </div>
+          <button class="calc-btn" onclick="calcSalaryCost()">Calculate</button>
+          <div class="result-grid" id="res-salary"></div>
+        </div>
+      </div>
+
+      <!-- Attrition Rate -->
+      <div class="calc-card" id="card-attrition">
+        <div class="calc-header" onclick="toggleCard('card-attrition')" aria-expanded="false" tabindex="0" role="button">
+          <div class="calc-icon" style="background:#FEF2F2;">
+            <svg viewBox="0 0 24 24" style="stroke:#B91C1C"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 17 22 17 22 11"/></svg>
+          </div>
+          <div>
+            <div class="calc-title">Attrition Rate</div>
+            <div class="calc-subtitle">Employee turnover &amp; replacement cost</div>
+          </div>
+          <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="calc-body">
+          <div class="field-grid">
+            <div class="field">
+              <label for="att-left">Employees Left (period)</label>
+              <input type="number" id="att-left" placeholder="8" min="0" />
+            </div>
+            <div class="field">
+              <label for="att-avg">Avg Headcount (period)</label>
+              <input type="number" id="att-avg" placeholder="100" min="1" />
+            </div>
+            <div class="field">
+              <label for="att-replace-cost">Avg Replacement Cost ($)</label>
+              <input type="number" id="att-replace-cost" placeholder="15,000" min="0" />
+            </div>
+          </div>
+          <button class="calc-btn" onclick="calcAttrition()">Calculate</button>
+          <div class="result-grid" id="res-attrition"></div>
+          <div class="tip">
+            <svg viewBox="0 0 24 24" width="14" height="14"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Industry benchmark: healthy attrition is 10–15% annually. Above 20% signals retention issues.
+          </div>
+        </div>
+      </div>
+
+      <!-- Hiring Cost -->
+      <div class="calc-card" id="card-hiring">
+        <div class="calc-header" onclick="toggleCard('card-hiring')" aria-expanded="false" tabindex="0" role="button">
+          <div class="calc-icon" style="background:#EFF6FF;">
+            <svg viewBox="0 0 24 24" style="stroke:#1C4ED8"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </div>
+          <div>
+            <div class="calc-title">Cost per Hire</div>
+            <div class="calc-subtitle">Total recruitment cost breakdown</div>
+          </div>
+          <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="calc-body">
+          <div class="field-grid">
+            <div class="field">
+              <label for="h-internal">Internal Recruiter Cost ($)</label>
+              <input type="number" id="h-internal" placeholder="5,000" min="0" />
+            </div>
+            <div class="field">
+              <label for="h-external">External Agency Fee ($)</label>
+              <input type="number" id="h-external" placeholder="3,000" min="0" />
+            </div>
+            <div class="field">
+              <label for="h-ads">Job Ads &amp; Tools ($)</label>
+              <input type="number" id="h-ads" placeholder="500" min="0" />
+            </div>
+            <div class="field">
+              <label for="h-onboarding">Onboarding Cost ($)</label>
+              <input type="number" id="h-onboarding" placeholder="2,000" min="0" />
+            </div>
+            <div class="field">
+              <label for="h-hires">Number of Hires</label>
+              <input type="number" id="h-hires" placeholder="10" min="1" />
+            </div>
+          </div>
+          <button class="calc-btn" onclick="calcHiring()">Calculate</button>
+          <div class="result-grid" id="res-hiring"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── GROWTH PANEL ────────────────────────────────────────── -->
+    <div class="panel" id="panel-growth" role="tabpanel">
+
+      <p class="section-label">Growth Metrics</p>
+
+      <!-- MoM Growth -->
+      <div class="calc-card open" id="card-mom">
+        <div class="calc-header" onclick="toggleCard('card-mom')" aria-expanded="true" tabindex="0" role="button">
+          <div class="calc-icon" style="background:#F0FDF4;">
+            <svg viewBox="0 0 24 24" style="stroke:#15803D"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+          </div>
+          <div>
+            <div class="calc-title">Month-over-Month Growth</div>
+            <div class="calc-subtitle">MoM &amp; annualised growth rate</div>
+          </div>
+          <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="calc-body">
+          <div class="field-grid">
+            <div class="field">
+              <label for="mom-prev">Previous Month Value ($)</label>
+              <input type="number" id="mom-prev" placeholder="80,000" min="0.01" />
+            </div>
+            <div class="field">
+              <label for="mom-curr">Current Month Value ($)</label>
+              <input type="number" id="mom-curr" placeholder="95,000" min="0" />
+            </div>
+          </div>
+          <button class="calc-btn" onclick="calcMoM()">Calculate</button>
+          <div class="result-grid" id="res-mom"></div>
+        </div>
+      </div>
+
+      <!-- CAGR -->
+      <div class="calc-card" id="card-cagr">
+        <div class="calc-header" onclick="toggleCard('card-cagr')" aria-expanded="false" tabindex="0" role="button">
+          <div class="calc-icon" style="background:#EFF6FF;">
+            <svg viewBox="0 0 24 24" style="stroke:#1C4ED8"><path d="M3 3v18h18"/><polyline points="7 16 11 12 15 14 19 8"/></svg>
+          </div>
+          <div>
+            <div class="calc-title">CAGR</div>
+            <div class="calc-subtitle">Compound Annual Growth Rate</div>
+          </div>
+          <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="calc-body">
+          <div class="field-grid">
+            <div class="field">
+              <label for="cagr-begin">Beginning Value ($)</label>
+              <input type="number" id="cagr-begin" placeholder="500,000" min="0.01" />
+            </div>
+            <div class="field">
+              <label for="cagr-end">Ending Value ($)</label>
+              <input type="number" id="cagr-end" placeholder="1,200,000" min="0" />
+            </div>
+            <div class="field">
+              <label for="cagr-years">Number of Years</label>
+              <input type="number" id="cagr-years" placeholder="5" min="0.1" />
+            </div>
+          </div>
+          <button class="calc-btn" onclick="calcCAGR()">Calculate</button>
+          <div class="result-grid" id="res-cagr"></div>
+        </div>
+      </div>
+
+      <p class="section-label">Customer Metrics</p>
+
+      <!-- CAC & LTV -->
+      <div class="calc-card" id="card-cac">
+        <div class="calc-header" onclick="toggleCard('card-cac')" aria-expanded="false" tabindex="0" role="button">
+          <div class="calc-icon" style="background:#F5F3FF;">
+            <svg viewBox="0 0 24 24" style="stroke:#6D28D9"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div>
+            <div class="calc-title">CAC &amp; LTV Ratio</div>
+            <div class="calc-subtitle">Customer acquisition &amp; lifetime value</div>
+          </div>
+          <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="calc-body">
+          <div class="field-grid">
+            <div class="field">
+              <label for="cac-spend">Total Marketing + Sales Spend ($)</label>
+              <input type="number" id="cac-spend" placeholder="50,000" min="0" />
+            </div>
+            <div class="field">
+              <label for="cac-customers">New Customers Acquired</label>
+              <input type="number" id="cac-customers" placeholder="100" min="1" />
+            </div>
+            <div class="field">
+              <label for="cac-arpu">Avg Revenue per User/Year ($)</label>
+              <input type="number" id="cac-arpu" placeholder="1,200" min="0" />
+            </div>
+            <div class="field">
+              <label for="cac-margin">Gross Margin (%)</label>
+              <input type="number" id="cac-margin" placeholder="70" min="0" max="100" />
+            </div>
+            <div class="field">
+              <label for="cac-churn">Annual Churn Rate (%)</label>
+              <input type="number" id="cac-churn" placeholder="15" min="0.1" max="100" />
+            </div>
+          </div>
+          <button class="calc-btn" onclick="calcCAC()">Calculate</button>
+          <div class="result-grid" id="res-cac"></div>
+          <div class="tip">
+            <svg viewBox="0 0 24 24" width="14" height="14"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Healthy LTV:CAC ratio is 3:1 or higher. Below 1:1 means you lose money per customer.
+          </div>
+        </div>
+      </div>
+
+      <!-- Burn Rate -->
+      <div class="calc-card" id="card-burn">
+        <div class="calc-header" onclick="toggleCard('card-burn')" aria-expanded="false" tabindex="0" role="button">
+          <div class="calc-icon" style="background:#FEF2F2;">
+            <svg viewBox="0 0 24 24" style="stroke:#B91C1C"><path d="M12 2c0 0-5 5-5 10a5 5 0 0 0 10 0C17 7 12 2 12 2z"/><path d="M12 2s2 5 2 8a2 2 0 0 1-4 0c0-3 2-8 2-8z"/></svg>
+          </div>
+          <div>
+            <div class="calc-title">Burn Rate &amp; Runway</div>
+            <div class="calc-subtitle">Monthly cash burn &amp; months of runway</div>
+          </div>
+          <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="calc-body">
+          <div class="field-grid">
+            <div class="field">
+              <label for="burn-cash">Cash on Hand ($)</label>
+              <input type="number" id="burn-cash" placeholder="2,000,000" min="0" />
+            </div>
+            <div class="field">
+              <label for="burn-expenses">Monthly Operating Expenses ($)</label>
+              <input type="number" id="burn-expenses" placeholder="150,000" min="0.01" />
+            </div>
+            <div class="field">
+              <label for="burn-revenue">Monthly Revenue ($)</label>
+              <input type="number" id="burn-revenue" placeholder="80,000" min="0" />
+            </div>
+          </div>
+          <button class="calc-btn" onclick="calcBurn()">Calculate</button>
+          <div class="result-grid" id="res-burn"></div>
+          <div class="tip">
+            <svg viewBox="0 0 24 24" width="14" height="14"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Target 18+ months of runway before your next fundraise. Below 6 months is critical.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    // ── Helpers ────────────────────────────────────────────────
+    const fmt = (n, dec=2) => isNaN(n)||!isFinite(n) ? '—' : n.toLocaleString('en-US',{minimumFractionDigits:dec,maximumFractionDigits:dec});
+    const fmtPct = n => fmt(n) + '%';
+    const fmtDollar = n => '$' + fmt(n, 0);
+    const val = id => parseFloat(document.getElementById(id).value) || 0;
+
+    function renderResults(containerId, items) {
+      const el = document.getElementById(containerId);
+      el.innerHTML = items.map(({label, value, unit, type='neutral'}) => `
+        <div class="result-card ${type}">
+          <div class="result-label">${label}</div>
+          <div class="result-value">${value}</div>
+          ${unit ? `<div class="result-unit">${unit}</div>` : ''}
+        </div>
+      `).join('');
+      requestAnimationFrame(() => {
+        el.querySelectorAll('.result-card').forEach((c,i) => {
+          setTimeout(() => c.classList.add('show'), i * 60);
+        });
+      });
+    }
+
+    // ── Toggle accordion ───────────────────────────────────────
+    function toggleCard(id) {
+      const card = document.getElementById(id);
+      const isOpen = card.classList.contains('open');
+      card.classList.toggle('open', !isOpen);
+      card.querySelector('.calc-header').setAttribute('aria-expanded', String(!isOpen));
+    }
+
+    // ── Tab switching ──────────────────────────────────────────
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        btn.setAttribute('aria-selected','true');
+        document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    // Keyboard: Enter/Space on accordion headers
+    document.querySelectorAll('.calc-header').forEach(h => {
+      h.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); h.click(); }
+      });
+    });
+
+    // ── CALCULATORS ────────────────────────────────────────────
+
+    function calcMargin() {
+      const rev = val('pm-revenue'), cogs = val('pm-cogs'),
+            opex = val('pm-opex'), tax = val('pm-tax');
+      if (!rev) return;
+      const gross = rev - cogs;
+      const operating = gross - opex;
+      const netBeforeTax = operating;
+      const net = netBeforeTax * (1 - tax / 100);
+      renderResults('res-margin', [
+        { label: 'Gross Profit',    value: fmtDollar(gross),              type: gross >= 0 ? 'positive' : 'negative' },
+        { label: 'Gross Margin',    value: fmtPct(gross / rev * 100),     type: gross >= 0 ? 'positive' : 'negative' },
+        { label: 'Operating Profit',value: fmtDollar(operating),          type: operating >= 0 ? 'neutral' : 'negative' },
+        { label: 'Operating Margin',value: fmtPct(operating / rev * 100), type: operating >= 0 ? 'neutral' : 'negative' },
+        { label: 'Net Profit',      value: fmtDollar(net),                type: net >= 0 ? 'positive' : 'negative' },
+        { label: 'Net Margin',      value: fmtPct(net / rev * 100),       type: net >= 0 ? 'positive' : 'negative' },
+      ]);
+    }
+
+    function calcROI() {
+      const gain = val('roi-gain'), cost = val('roi-cost'), months = val('roi-months') || 12;
+      if (!cost) return;
+      const roi = (gain / cost) * 100;
+      const annualROI = (Math.pow(1 + roi / 100, 12 / months) - 1) * 100;
+      renderResults('res-roi', [
+        { label: 'ROI',              value: fmtPct(roi),        type: roi >= 0 ? 'positive' : 'negative' },
+        { label: 'Net Gain',         value: fmtDollar(gain),    type: gain >= 0 ? 'positive' : 'negative' },
+        { label: 'Annualised ROI',   value: fmtPct(annualROI),  type: annualROI >= 0 ? 'neutral' : 'negative' },
+        { label: 'Payback Period',   value: gain > 0 ? fmt(cost/gain*months, 1) : '—', unit: 'months', type: 'neutral' },
+      ]);
+    }
+
+    function calcBreakEven() {
+      const fixed = val('be-fixed'), price = val('be-price'), vc = val('be-vc');
+      if (!price || price <= vc) return;
+      const cm = price - vc;
+      const units = fixed / cm;
+      const revenue = units * price;
+      renderResults('res-breakeven', [
+        { label: 'Break-Even Units',   value: fmt(units, 0), unit: 'units',   type: 'neutral' },
+        { label: 'Break-Even Revenue', value: fmtDollar(revenue),             type: 'warning' },
+        { label: 'Contribution Margin',value: fmtDollar(cm), unit: 'per unit',type: 'positive' },
+        { label: 'CM Ratio',           value: fmtPct(cm/price*100),           type: 'neutral' },
+      ]);
+    }
+
+    function calcEBITDA() {
+      const rev = val('eb-revenue'), cogs = val('eb-cogs'), opex = val('eb-opex'),
+            da = val('eb-da'), interest = val('eb-interest'), tax2 = val('eb-tax2');
+      if (!rev) return;
+      const netIncome = rev - cogs - opex - da - interest - tax2;
+      const ebitda = netIncome + interest + tax2 + da;
+      renderResults('res-ebitda', [
+        { label: 'EBITDA',        value: fmtDollar(ebitda),              type: ebitda >= 0 ? 'positive' : 'negative' },
+        { label: 'EBITDA Margin', value: fmtPct(ebitda / rev * 100),     type: ebitda >= 0 ? 'positive' : 'negative' },
+        { label: 'Net Income',    value: fmtDollar(netIncome),           type: netIncome >= 0 ? 'neutral' : 'negative' },
+        { label: 'EBIT',          value: fmtDollar(ebitda - da),         type: 'neutral' },
+      ]);
+    }
+
+    function calcSalaryCost() {
+      const hc = val('sc-headcount'), salary = val('sc-avg-salary'),
+            benefits = val('sc-benefits'), empTax = val('sc-employer-tax');
+      if (!hc || !salary) return;
+      const baseCost = hc * salary;
+      const totalCost = baseCost * (1 + benefits / 100 + empTax / 100);
+      const perEmployee = totalCost / hc;
+      renderResults('res-salary', [
+        { label: 'Annual Base Cost',  value: fmtDollar(baseCost),    type: 'neutral' },
+        { label: 'Total Cost/Year',   value: fmtDollar(totalCost),   type: 'warning' },
+        { label: 'Monthly Cost',      value: fmtDollar(totalCost/12),type: 'neutral' },
+        { label: 'Cost per Employee', value: fmtDollar(perEmployee), type: 'neutral' },
+        { label: 'Benefits Cost',     value: fmtDollar(baseCost * benefits / 100), type: 'neutral' },
+      ]);
+    }
+
+    function calcAttrition() {
+      const left = val('att-left'), avg = val('att-avg'), replace = val('att-replace-cost');
+      if (!avg) return;
+      const rate = (left / avg) * 100;
+      const totalCost = left * replace;
+      renderResults('res-attrition', [
+        { label: 'Attrition Rate',    value: fmtPct(rate),         type: rate > 20 ? 'negative' : rate > 15 ? 'warning' : 'positive' },
+        { label: 'Employees Lost',    value: fmt(left, 0),         unit: 'people', type: 'neutral' },
+        { label: 'Total Replace Cost',value: fmtDollar(totalCost), type: 'negative' },
+        { label: 'Annual Projection', value: fmtDollar(totalCost * (12 / 12)), type: 'warning' },
+      ]);
+    }
+
+    function calcHiring() {
+      const internal = val('h-internal'), external = val('h-external'),
+            ads = val('h-ads'), onboarding = val('h-onboarding'), hires = val('h-hires') || 1;
+      const total = internal + external + ads + onboarding;
+      const perHire = total / hires;
+      renderResults('res-hiring', [
+        { label: 'Total Recruiting Cost', value: fmtDollar(total),    type: 'warning' },
+        { label: 'Cost per Hire',         value: fmtDollar(perHire),  type: 'neutral' },
+        { label: 'Internal Cost',         value: fmtDollar(internal), type: 'neutral' },
+        { label: 'External Cost',         value: fmtDollar(external), type: 'neutral' },
+      ]);
+    }
+
+    function calcMoM() {
+      const prev = val('mom-prev'), curr = val('mom-curr');
+      if (!prev) return;
+      const mom = ((curr - prev) / prev) * 100;
+      const annualised = (Math.pow(1 + mom / 100, 12) - 1) * 100;
+      const change = curr - prev;
+      renderResults('res-mom', [
+        { label: 'MoM Growth',       value: fmtPct(mom),        type: mom >= 0 ? 'positive' : 'negative' },
+        { label: 'Change',           value: fmtDollar(change),  type: change >= 0 ? 'positive' : 'negative' },
+        { label: 'Annualised Rate',  value: fmtPct(annualised), type: annualised >= 0 ? 'neutral' : 'negative' },
+        { label: 'Current Value',    value: fmtDollar(curr),    type: 'neutral' },
+      ]);
+    }
+
+    function calcCAGR() {
+      const begin = val('cagr-begin'), end = val('cagr-end'), years = val('cagr-years');
+      if (!begin || !years) return;
+      const cagr = (Math.pow(end / begin, 1 / years) - 1) * 100;
+      const totalGrowth = ((end - begin) / begin) * 100;
+      renderResults('res-cagr', [
+        { label: 'CAGR',          value: fmtPct(cagr),        type: cagr >= 0 ? 'positive' : 'negative' },
+        { label: 'Total Growth',  value: fmtPct(totalGrowth), type: totalGrowth >= 0 ? 'neutral' : 'negative' },
+        { label: 'Value Added',   value: fmtDollar(end-begin),type: (end-begin) >= 0 ? 'positive' : 'negative' },
+        { label: 'Final Value',   value: fmtDollar(end),      type: 'neutral' },
+      ]);
+    }
+
+    function calcCAC() {
+      const spend = val('cac-spend'), customers = val('cac-customers') || 1,
+            arpu = val('cac-arpu'), margin = val('cac-margin'), churn = val('cac-churn') || 1;
+      const cac = spend / customers;
+      const ltv = (arpu * margin / 100) / (churn / 100);
+      const ratio = ltv / cac;
+      renderResults('res-cac', [
+        { label: 'CAC',           value: fmtDollar(cac),   type: 'warning' },
+        { label: 'LTV',           value: fmtDollar(ltv),   type: 'positive' },
+        { label: 'LTV:CAC Ratio', value: fmt(ratio,1) + ':1', type: ratio >= 3 ? 'positive' : ratio >= 1 ? 'warning' : 'negative' },
+        { label: 'CAC Payback',   value: fmt(cac / (arpu * margin / 100 / 12), 1), unit: 'months', type: 'neutral' },
+      ]);
+    }
+
+    function calcBurn() {
+      const cash = val('burn-cash'), expenses = val('burn-expenses'), revenue = val('burn-revenue');
+      if (!expenses) return;
+      const grossBurn = expenses;
+      const netBurn = expenses - revenue;
+      const runway = netBurn > 0 ? cash / netBurn : Infinity;
+      renderResults('res-burn', [
+        { label: 'Gross Burn/Month', value: fmtDollar(grossBurn),                           type: 'negative' },
+        { label: 'Net Burn/Month',   value: netBurn > 0 ? fmtDollar(netBurn) : 'Cash Flow+',type: netBurn > 0 ? 'warning' : 'positive' },
+        { label: 'Runway',           value: isFinite(runway) ? fmt(runway, 1) : '∞',        unit: 'months', type: runway >= 18 ? 'positive' : runway >= 6 ? 'warning' : 'negative' },
+        { label: 'Cash on Hand',     value: fmtDollar(cash),                                 type: 'neutral' },
+      ]);
+    }
+  </script>
+
+</body>
+</html>
