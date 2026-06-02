@@ -3,943 +3,964 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Company Parameter Calculator</title>
+  <title>HTS 2026 — Parameter Calculator</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
     :root {
-      --bg:        #F8F9FA;
-      --surface:   #FFFFFF;
-      --surface2:  #F1F3F5;
-      --border:    #DEE2E6;
-      --text:      #0F172A;
-      --muted:     #495057;
-      --subtle:    #868E96;
-      --accent:    #1C4ED8;
-      --accent2:   #0369A1;
-      --gold:      #B45309;
-      --success:   #15803D;
-      --warning:   #B45309;
-      --danger:    #B91C1C;
+      --bg:       #F8F9FA;
+      --surface:  #FFFFFF;
+      --surface2: #F1F3F5;
+      --border:   #DEE2E6;
+      --text:     #0F172A;
+      --muted:    #495057;
+      --subtle:   #868E96;
+      --accent:   #1C4ED8;
+      --success:  #15803D;
+      --warning:  #B45309;
+      --danger:   #B91C1C;
+      --hts:      #0369A1;
       --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
-      --shadow-md: 0 4px 12px rgba(0,0,0,0.10);
-      --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
-      --radius:    10px;
-      --transition: 200ms ease;
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.10);
+      --shadow-lg: 0 8px 32px rgba(0,0,0,0.14);
+      --r: 12px;
+      --t: 200ms ease;
     }
-
     html { scroll-behavior: smooth; font-size: 16px; }
-    body {
-      font-family: 'IBM Plex Sans', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.6;
-      overflow-x: hidden;
-    }
+    body { font-family: 'IBM Plex Sans', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; overflow-x: hidden; }
 
-    /* ── Header ──────────────────────────────────────────────── */
+    /* ── HEADER ─────────────────────────────────────────────────── */
     header {
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      position: sticky; top: 0; z-index: 50;
-      box-shadow: var(--shadow-sm);
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow-sm);
     }
     .header-inner {
-      max-width: 1100px; margin: 0 auto;
-      padding: 0 1.5rem;
-      height: 60px;
-      display: flex; align-items: center; justify-content: space-between;
+      max-width: 1140px; margin: 0 auto; padding: 0 1.5rem;
+      height: 58px; display: flex; align-items: center; justify-content: space-between;
     }
-    .logo {
-      display: flex; align-items: center; gap: 0.6rem;
-      font-size: 1.05rem; font-weight: 700; color: var(--text);
-      text-decoration: none; letter-spacing: -0.02em;
+    .logo { display: flex; align-items: center; gap: 0.6rem; font-size: 1rem; font-weight: 700; color: var(--text); letter-spacing: -0.02em; }
+    .logo-icon { width: 30px; height: 30px; background: var(--hts); border-radius: 7px; display: flex; align-items: center; justify-content: center; }
+    .logo-icon svg { width: 16px; height: 16px; stroke: #fff; fill: none; stroke-width: 2; }
+    .back-btn {
+      display: none; align-items: center; gap: 0.4rem; padding: 0.4rem 0.9rem;
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 7px;
+      font-family: inherit; font-size: 0.82rem; font-weight: 600; color: var(--muted); cursor: pointer;
+      transition: all var(--t);
     }
-    .logo-icon {
-      width: 32px; height: 32px;
-      background: var(--accent);
-      border-radius: 7px;
-      display: flex; align-items: center; justify-content: center;
+    .back-btn:hover { background: var(--border); color: var(--text); }
+    .back-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+    /* ── MAIN ────────────────────────────────────────────────────── */
+    main { max-width: 1140px; margin: 0 auto; padding: 2.5rem 1.5rem 5rem; }
+
+    /* ── LANDING ─────────────────────────────────────────────────── */
+    #landing { animation: fadeUp 0.5s ease forwards; }
+    .landing-title { text-align: center; margin-bottom: 3rem; }
+    .landing-title h1 { font-size: clamp(1.6rem, 4vw, 2.2rem); font-weight: 700; letter-spacing: -0.03em; }
+    .landing-title p { color: var(--muted); margin-top: 0.4rem; font-size: 0.95rem; }
+
+    .category-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem;
+      max-width: 900px; margin: 0 auto;
     }
-    .logo-icon svg { width: 18px; height: 18px; stroke: #fff; fill: none; stroke-width: 2; }
-    .header-badge {
-      font-size: 0.72rem; font-weight: 500;
-      background: #EFF6FF; color: var(--accent);
-      border: 1px solid #BFDBFE;
-      border-radius: 100px;
-      padding: 0.2rem 0.7rem;
-      letter-spacing: 0.03em;
+    .cat-card {
+      background: var(--surface); border: 2px solid var(--border);
+      border-radius: 16px; padding: 2.5rem 1rem;
+      text-align: center; cursor: pointer;
+      transition: all var(--t); position: relative; overflow: hidden;
+    }
+    .cat-card::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, transparent, rgba(28,78,216,0.04));
+      opacity: 0; transition: opacity var(--t);
+    }
+    .cat-card:hover { border-color: var(--accent); box-shadow: var(--shadow-md); transform: translateY(-4px); }
+    .cat-card:hover::before { opacity: 1; }
+    .cat-card.active-cat { border-color: var(--hts); background: #EFF6FF; }
+    .cat-card.disabled { opacity: 0.45; cursor: not-allowed; }
+    .cat-card.disabled:hover { transform: none; border-color: var(--border); box-shadow: none; }
+    .cat-icon { font-size: 2.8rem; margin-bottom: 0.8rem; display: block; }
+    .cat-name { font-size: 1.4rem; font-weight: 700; letter-spacing: 0.02em; color: var(--text); }
+    .cat-desc { font-size: 0.75rem; color: var(--subtle); margin-top: 0.3rem; }
+    .cat-badge {
+      display: inline-block; margin-top: 0.7rem;
+      font-size: 0.68rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+      padding: 0.2rem 0.7rem; border-radius: 100px;
+    }
+    .badge-active { background: #DCFCE7; color: var(--success); }
+    .badge-soon   { background: #F3F4F6; color: var(--subtle); }
+
+    /* ── HTS SECTION ─────────────────────────────────────────────── */
+    #hts-section { display: none; }
+    #hts-section.show { display: block; animation: fadeUp 0.35s ease forwards; }
+
+    .section-hero {
+      background: linear-gradient(135deg, #0369A1, #1C4ED8);
+      border-radius: 14px; padding: 1.8rem 2rem; margin-bottom: 2rem; color: #fff;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+    }
+    .section-hero h2 { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.02em; }
+    .section-hero p  { font-size: 0.85rem; opacity: 0.85; margin-top: 0.2rem; }
+    .hero-pills { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .hero-pill {
+      background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 100px; padding: 0.25rem 0.8rem; font-size: 0.75rem; font-weight: 600;
     }
 
-    /* ── Main ────────────────────────────────────────────────── */
-    main { max-width: 1100px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
-
-    /* ── Page Title ──────────────────────────────────────────── */
-    .page-title {
-      margin-bottom: 2.5rem;
-      opacity: 0; transform: translateY(16px);
-      animation: fadeUp 0.5s ease 0.1s forwards;
-    }
-    .page-title h1 {
-      font-size: clamp(1.5rem, 3.5vw, 2rem);
-      font-weight: 700; letter-spacing: -0.03em;
-      line-height: 1.2;
-    }
-    .page-title p { color: var(--muted); margin-top: 0.4rem; font-size: 0.95rem; }
-
-    /* ── Tab Nav ─────────────────────────────────────────────── */
+    /* ── TAB NAV ─────────────────────────────────────────────────── */
     .tab-nav {
-      display: flex; gap: 0.25rem; flex-wrap: wrap;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 0.3rem;
-      margin-bottom: 2rem;
-      opacity: 0; animation: fadeUp 0.5s ease 0.2s forwards;
+      display: flex; gap: 0.2rem; flex-wrap: wrap;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 0.3rem; margin-bottom: 2rem;
     }
     .tab-btn {
-      padding: 0.5rem 1.1rem;
-      border: none; background: transparent;
-      font-family: inherit; font-size: 0.85rem; font-weight: 500;
-      color: var(--muted); border-radius: 7px;
-      cursor: pointer;
-      transition: background var(--transition), color var(--transition), box-shadow var(--transition);
-      white-space: nowrap;
+      padding: 0.5rem 1.1rem; border: none; background: transparent;
+      font-family: inherit; font-size: 0.83rem; font-weight: 500;
+      color: var(--muted); border-radius: 8px; cursor: pointer; white-space: nowrap;
+      transition: all var(--t);
     }
     .tab-btn:hover { color: var(--text); background: rgba(255,255,255,0.7); }
-    .tab-btn.active {
-      background: var(--surface);
-      color: var(--accent);
-      box-shadow: var(--shadow-sm);
-    }
+    .tab-btn.active { background: var(--surface); color: var(--accent); box-shadow: var(--shadow-sm); font-weight: 600; }
 
-    /* ── Panel ───────────────────────────────────────────────── */
     .panel { display: none; }
-    .panel.active { display: block; animation: fadeUp 0.3s ease forwards; }
+    .panel.active { display: block; animation: fadeUp 0.25s ease forwards; }
 
-    /* ── Calculator Card ─────────────────────────────────────── */
+    /* ── CALC CARD ───────────────────────────────────────────────── */
     .calc-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow-sm);
-      margin-bottom: 1.5rem;
-      overflow: hidden;
-      transition: box-shadow var(--transition);
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r); box-shadow: var(--shadow-sm);
+      margin-bottom: 1.5rem; overflow: hidden; transition: box-shadow var(--t);
     }
     .calc-card:hover { box-shadow: var(--shadow-md); }
-
     .calc-header {
       display: flex; align-items: center; gap: 0.75rem;
-      padding: 1.1rem 1.4rem;
-      border-bottom: 1px solid var(--border);
-      cursor: pointer;
-      user-select: none;
+      padding: 1rem 1.4rem; border-bottom: 1px solid var(--border);
+      cursor: pointer; user-select: none;
     }
-    .calc-icon {
-      width: 36px; height: 36px; flex-shrink: 0;
-      border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
-    }
+    .calc-icon { width: 36px; height: 36px; flex-shrink: 0; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
     .calc-icon svg { width: 18px; height: 18px; stroke-width: 1.8; fill: none; }
-    .calc-title { font-size: 0.95rem; font-weight: 600; flex: 1; }
-    .calc-subtitle { font-size: 0.78rem; color: var(--subtle); margin-top: 0.05rem; }
-    .chevron {
-      width: 18px; height: 18px; stroke: var(--subtle); fill: none; stroke-width: 2;
-      transition: transform 0.25s ease;
-    }
+    .calc-title { font-size: 0.92rem; font-weight: 600; flex: 1; }
+    .calc-sub { font-size: 0.76rem; color: var(--subtle); margin-top: 0.05rem; }
+    .chevron { width: 16px; height: 16px; stroke: var(--subtle); fill: none; stroke-width: 2; transition: transform 0.25s ease; }
     .calc-card.open .chevron { transform: rotate(180deg); }
-
-    .calc-body {
-      padding: 1.4rem;
-      display: none;
-    }
+    .calc-body { padding: 1.4rem; display: none; }
     .calc-card.open .calc-body { display: block; animation: fadeUp 0.2s ease forwards; }
 
-    /* ── Form ────────────────────────────────────────────────── */
-    .field-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 1rem;
-      margin-bottom: 1.2rem;
+    /* ── FORM ────────────────────────────────────────────────────── */
+    .wl-select-row { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.4rem; flex-wrap: wrap; }
+    .wl-select-row label { font-size: 0.78rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
+    .wl-select-row select, .wl-select-row .region-toggle { padding: 0.5rem 0.9rem; border: 1px solid var(--border); border-radius: 7px; font-family: inherit; font-size: 0.88rem; color: var(--text); background: var(--surface2); outline: none; cursor: pointer; transition: border-color var(--t), box-shadow var(--t); }
+    .wl-select-row select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(28,78,216,0.1); }
+
+    .param-block { margin-bottom: 1.5rem; }
+    .param-label {
+      font-size: 0.8rem; font-weight: 700; color: var(--text);
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 7px; padding: 0.55rem 0.9rem; margin-bottom: 0.85rem;
+      display: flex; align-items: center; justify-content: space-between;
     }
-    .field { display: flex; flex-direction: column; gap: 0.35rem; }
-    .field label {
-      font-size: 0.78rem; font-weight: 600;
-      color: var(--muted); letter-spacing: 0.03em;
-      text-transform: uppercase;
-    }
+    .param-wt { font-size: 0.72rem; font-weight: 600; color: var(--accent); background: #EFF6FF; border-radius: 100px; padding: 0.15rem 0.6rem; border: 1px solid #BFDBFE; }
+
+    .field-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.9rem; }
+    .field { display: flex; flex-direction: column; gap: 0.3rem; }
+    .field label { font-size: 0.73rem; font-weight: 600; color: var(--muted); letter-spacing: 0.04em; text-transform: uppercase; }
     .field input, .field select {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 7px;
-      padding: 0.65rem 0.85rem;
-      font-family: inherit; font-size: 0.92rem; color: var(--text);
-      outline: none;
-      transition: border-color var(--transition), box-shadow var(--transition);
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 7px;
+      padding: 0.6rem 0.8rem; font-family: inherit; font-size: 0.9rem; color: var(--text);
+      outline: none; transition: border-color var(--t), box-shadow var(--t);
       -moz-appearance: textfield;
     }
-    .field input::-webkit-outer-spin-button,
-    .field input::-webkit-inner-spin-button { -webkit-appearance: none; }
-    .field input:focus, .field select:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(28,78,216,0.1);
-      background: #fff;
-    }
+    .field input::-webkit-outer-spin-button, .field input::-webkit-inner-spin-button { -webkit-appearance: none; }
+    .field input:focus, .field select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(28,78,216,0.1); background: #fff; }
     .field input::placeholder { color: var(--subtle); }
 
     .calc-btn {
-      padding: 0.65rem 1.6rem;
-      background: var(--accent);
+      margin-top: 1rem; padding: 0.65rem 1.8rem; background: var(--accent);
       color: #fff; font-family: inherit; font-size: 0.88rem; font-weight: 600;
-      border: none; border-radius: 7px;
-      cursor: pointer;
-      transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+      border: none; border-radius: 7px; cursor: pointer;
+      transition: background var(--t), transform var(--t), box-shadow var(--t);
     }
-    .calc-btn:hover {
-      background: #1741B5;
-      box-shadow: 0 4px 12px rgba(28,78,216,0.3);
-      transform: translateY(-1px);
-    }
+    .calc-btn:hover { background: #1741B5; box-shadow: 0 4px 12px rgba(28,78,216,0.3); transform: translateY(-1px); }
     .calc-btn:active { transform: translateY(0); }
 
-    /* ── Result Cards ────────────────────────────────────────── */
-    .result-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap: 0.85rem;
-      margin-top: 1.2rem;
-    }
+    /* ── RESULTS ─────────────────────────────────────────────────── */
+    .result-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 0.8rem; margin-top: 1.2rem; }
     .result-card {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 1rem 1.1rem;
-      opacity: 0; transform: translateY(10px);
-      animation: none;
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 9px;
+      padding: 0.95rem 1rem; opacity: 0; transform: translateY(8px);
     }
-    .result-card.show {
-      animation: popIn 0.3s ease forwards;
-    }
-    .result-label {
-      font-size: 0.72rem; font-weight: 600;
-      color: var(--subtle); text-transform: uppercase; letter-spacing: 0.05em;
-      margin-bottom: 0.35rem;
-    }
-    .result-value {
-      font-size: 1.5rem; font-weight: 700; letter-spacing: -0.03em;
-      line-height: 1.1;
-    }
-    .result-unit { font-size: 0.75rem; color: var(--subtle); margin-top: 0.2rem; }
+    .result-card.show { animation: popIn 0.3s ease forwards; }
+    .result-label { font-size: 0.7rem; font-weight: 600; color: var(--subtle); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.3rem; }
+    .result-value { font-size: 1.45rem; font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; }
+    .result-unit  { font-size: 0.72rem; color: var(--subtle); margin-top: 0.15rem; }
     .result-card.positive .result-value { color: var(--success); }
     .result-card.negative .result-value { color: var(--danger); }
-    .result-card.neutral .result-value  { color: var(--accent);  }
-    .result-card.warning .result-value  { color: var(--warning); }
+    .result-card.neutral  .result-value { color: var(--accent); }
+    .result-card.warning  .result-value { color: var(--warning); }
+    .result-card.payout   { background: #EFF6FF; border-color: #BFDBFE; }
+    .result-card.payout .result-value { color: var(--hts); font-size: 1.7rem; }
 
-    /* ── Section divider ─────────────────────────────────────── */
-    .section-label {
-      font-size: 0.72rem; font-weight: 700;
-      color: var(--subtle); text-transform: uppercase; letter-spacing: 0.1em;
-      margin: 2rem 0 1rem;
-      padding-bottom: 0.5rem;
-      border-bottom: 1px solid var(--border);
-    }
+    /* ── SLAB TABLE ──────────────────────────────────────────────── */
+    .slab-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin-top: 0.75rem; }
+    .slab-table th { background: var(--surface2); padding: 0.5rem 0.75rem; text-align: left; font-weight: 600; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); border-bottom: 1px solid var(--border); }
+    .slab-table td { padding: 0.45rem 0.75rem; border-bottom: 1px solid var(--border); color: var(--text); }
+    .slab-table tr.hit td { background: #DCFCE7; font-weight: 600; }
+    .slab-table tr.hit td:first-child::before { content: '✓ '; color: var(--success); }
 
-    /* ── Tip box ─────────────────────────────────────────────── */
-    .tip {
-      font-size: 0.8rem; color: var(--muted);
-      background: #EFF6FF; border: 1px solid #BFDBFE;
-      border-radius: 7px; padding: 0.65rem 0.9rem;
-      margin-top: 0.9rem;
-      display: flex; gap: 0.5rem; align-items: flex-start;
-    }
-    .tip svg { flex-shrink: 0; margin-top: 1px; stroke: var(--accent); fill: none; stroke-width: 2; }
+    .section-divider { font-size: 0.7rem; font-weight: 700; color: var(--subtle); text-transform: uppercase; letter-spacing: 0.1em; margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
 
-    /* ── Animations ──────────────────────────────────────────── */
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(16px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes popIn {
-      0%   { opacity: 0; transform: translateY(10px) scale(0.97); }
-      100% { opacity: 1; transform: translateY(0)    scale(1); }
-    }
+    .tip { font-size: 0.78rem; color: var(--muted); background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 7px; padding: 0.6rem 0.85rem; margin-top: 0.85rem; display: flex; gap: 0.5rem; align-items: flex-start; }
+    .tip svg { flex-shrink: 0; margin-top: 1px; width: 13px; height: 13px; stroke: var(--accent); fill: none; stroke-width: 2; }
 
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
-    }
+    /* ── ANIMATIONS ──────────────────────────────────────────────── */
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes popIn  { 0% { opacity: 0; transform: translateY(8px) scale(0.97); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
 
-    /* ── Responsive ──────────────────────────────────────────── */
-    @media (max-width: 600px) {
-      main { padding: 1.5rem 1rem 3rem; }
+    /* ── RESPONSIVE ──────────────────────────────────────────────── */
+    @media (max-width: 700px) {
+      .category-grid { grid-template-columns: 1fr 1fr; }
       .field-grid { grid-template-columns: 1fr; }
       .result-grid { grid-template-columns: 1fr 1fr; }
+      .section-hero { flex-direction: column; }
+    }
+    @media (max-width: 400px) {
+      .category-grid { grid-template-columns: 1fr 1fr; gap: 0.9rem; }
+      .cat-card { padding: 1.8rem 0.7rem; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Header -->
-  <header>
-    <div class="header-inner">
-      <a href="#" class="logo">
-        <div class="logo-icon">
-          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-        </div>
-        Company Parameters
-      </a>
-      <span class="header-badge">Internal Tool</span>
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      </div>
+      HTS 2026 Parameters
     </div>
-  </header>
+    <button class="back-btn" id="backBtn" onclick="showLanding()">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      Back
+    </button>
+  </div>
+</header>
 
-  <main>
-    <div class="page-title">
+<main>
+
+  <!-- ── LANDING ────────────────────────────────────────────────── -->
+  <div id="landing">
+    <div class="landing-title">
       <h1>Company Parameter Calculator</h1>
-      <p>Enter values to instantly calculate key business metrics across all departments.</p>
+      <p>Select your category to view and calculate 2026 performance parameters.</p>
+    </div>
+    <div class="category-grid">
+      <div class="cat-card disabled" onclick="">
+        <span class="cat-icon">🏪</span>
+        <div class="cat-name">GT</div>
+        <div class="cat-desc">General Trade</div>
+        <span class="cat-badge badge-soon">Coming Soon</span>
+      </div>
+      <div class="cat-card disabled" onclick="">
+        <span class="cat-icon">🏬</span>
+        <div class="cat-name">MT</div>
+        <div class="cat-desc">Modern Trade</div>
+        <span class="cat-badge badge-soon">Coming Soon</span>
+      </div>
+      <div class="cat-card" onclick="showHTS()">
+        <span class="cat-icon">📊</span>
+        <div class="cat-name">HTS</div>
+        <div class="cat-desc">Home & Tea Solutions</div>
+        <span class="cat-badge badge-active">2026 Live</span>
+      </div>
+      <div class="cat-card disabled" onclick="">
+        <span class="cat-icon">🚀</span>
+        <div class="cat-name">RS</div>
+        <div class="cat-desc">Rural Sales</div>
+        <span class="cat-badge badge-soon">Coming Soon</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── HTS SECTION ────────────────────────────────────────────── -->
+  <div id="hts-section">
+    <div class="section-hero">
+      <div>
+        <h2>HTS — 2026 Parameter Calculators</h2>
+        <p>Monthly PRP, Quarterly QPB, WPG, RSSM Incentive &amp; RS CDT</p>
+      </div>
+      <div class="hero-pills">
+        <span class="hero-pill">PRP Monthly</span>
+        <span class="hero-pill">QPB Quarterly</span>
+        <span class="hero-pill">WPG</span>
+        <span class="hero-pill">RSSM</span>
+        <span class="hero-pill">RS CDT</span>
+      </div>
     </div>
 
-    <!-- Tab Navigation -->
-    <nav class="tab-nav" role="tablist" aria-label="Calculator categories">
-      <button class="tab-btn active" role="tab" data-tab="financial" aria-selected="true">Financial</button>
-      <button class="tab-btn" role="tab" data-tab="hr" aria-selected="false">HR &amp; Headcount</button>
-      <button class="tab-btn" role="tab" data-tab="growth" aria-selected="false">Growth &amp; KPIs</button>
+    <nav class="tab-nav" role="tablist">
+      <button class="tab-btn active" role="tab" data-tab="prp">PRP Payout</button>
+      <button class="tab-btn" role="tab" data-tab="qpb">QPB</button>
+      <button class="tab-btn" role="tab" data-tab="wpg">WPG</button>
+      <button class="tab-btn" role="tab" data-tab="rssm">RSSM Incentive</button>
+      <button class="tab-btn" role="tab" data-tab="cdt">RS CDT</button>
     </nav>
 
-    <!-- ── FINANCIAL PANEL ─────────────────────────────────────── -->
-    <div class="panel active" id="panel-financial" role="tabpanel">
-
-      <p class="section-label">Profitability</p>
-
-      <!-- Profit Margin -->
-      <div class="calc-card open" id="card-margin">
-        <div class="calc-header" onclick="toggleCard('card-margin')" aria-expanded="true" tabindex="0" role="button">
-          <div class="calc-icon" style="background:#EFF6FF;">
-            <svg viewBox="0 0 24 24" style="stroke:#1C4ED8"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-          </div>
-          <div>
-            <div class="calc-title">Profit Margin</div>
-            <div class="calc-subtitle">Gross, Operating &amp; Net</div>
-          </div>
+    <!-- ── PRP PAYOUT ──────────────────────────────────────────── -->
+    <div class="panel active" id="panel-prp">
+      <div class="calc-card open" id="card-prp">
+        <div class="calc-header" onclick="toggleCard('card-prp')">
+          <div class="calc-icon" style="background:#EFF6FF;"><svg viewBox="0 0 24 24" style="stroke:#1C4ED8"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+          <div><div class="calc-title">PRP Payout — Monthly (1ABC Explode)</div><div class="calc-sub">3 Parameters · WL1A / WL1B / WL1C / TTSO</div></div>
           <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
         </div>
         <div class="calc-body">
-          <div class="field-grid">
-            <div class="field">
-              <label for="pm-revenue">Revenue ($)</label>
-              <input type="number" id="pm-revenue" placeholder="1,000,000" min="0" />
+          <div class="wl-select-row">
+            <label for="prp-wl">Work Level</label>
+            <select id="prp-wl">
+              <option value="14500">WL1A — Max ₹14,500</option>
+              <option value="18000">WL1B — Max ₹18,000</option>
+              <option value="20500">WL1C — Max ₹20,500</option>
+              <option value="6000">TTSO — Max ₹6,000</option>
+            </select>
+          </div>
+
+          <!-- P1 -->
+          <div class="param-block">
+            <div class="param-label">
+              Parameter 1 — MGP (HTS + IBS)
+              <span class="param-wt">Weightage 40%</span>
             </div>
-            <div class="field">
-              <label for="pm-cogs">COGS ($)</label>
-              <input type="number" id="pm-cogs" placeholder="400,000" min="0" />
-            </div>
-            <div class="field">
-              <label for="pm-opex">Operating Expenses ($)</label>
-              <input type="number" id="pm-opex" placeholder="200,000" min="0" />
-            </div>
-            <div class="field">
-              <label for="pm-tax">Tax Rate (%)</label>
-              <input type="number" id="pm-tax" placeholder="21" min="0" max="100" />
+            <div class="field-grid">
+              <div class="field"><label>Target</label><input type="number" id="p1-tgt" placeholder="e.g. 500000" /></div>
+              <div class="field"><label>Achievement</label><input type="number" id="p1-ach" placeholder="e.g. 520000" /></div>
             </div>
           </div>
-          <button class="calc-btn" onclick="calcMargin()">Calculate</button>
-          <div class="result-grid" id="res-margin"></div>
+
+          <!-- P2 -->
+          <div class="param-block">
+            <div class="param-label">
+              Parameter 2 — My HTS (No. of Growing OIs)
+              <span class="param-wt">Weightage 20%</span>
+            </div>
+            <div class="field-grid">
+              <div class="field"><label>Target (OIs)</label><input type="number" id="p2-tgt" placeholder="e.g. 100" /></div>
+              <div class="field"><label>Achievement (OIs)</label><input type="number" id="p2-ach" placeholder="e.g. 92" /></div>
+            </div>
+          </div>
+
+          <!-- P3a -->
+          <div class="param-block">
+            <div class="param-label">
+              Parameter 3a — Coverage
+              <span class="param-wt">Weightage 20%</span>
+            </div>
+            <div class="field-grid">
+              <div class="field"><label>Target Outlets</label><input type="number" id="p3a-tgt" placeholder="e.g. 200" /></div>
+              <div class="field"><label>Covered Outlets</label><input type="number" id="p3a-ach" placeholder="e.g. 190" /></div>
+            </div>
+          </div>
+
+          <!-- P3b -->
+          <div class="param-block">
+            <div class="param-label">
+              Parameter 3b — South: RTD+Biscuits Value &nbsp;/&nbsp; Non-South: EFOS (min 20 bills)
+              <span class="param-wt">Weightage 20%</span>
+            </div>
+            <div class="field-grid">
+              <div class="field"><label>Target</label><input type="number" id="p3b-tgt" placeholder="e.g. 300000" /></div>
+              <div class="field"><label>Achievement</label><input type="number" id="p3b-ach" placeholder="e.g. 280000" /></div>
+            </div>
+          </div>
+
+          <button class="calc-btn" onclick="calcPRP()">Calculate PRP Payout</button>
+          <div class="result-grid" id="res-prp"></div>
+
           <div class="tip">
-            <svg viewBox="0 0 24 24" width="14" height="14"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            Net Profit Margin = (Revenue − COGS − OpEx) × (1 − Tax) ÷ Revenue × 100
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Slabs — P1 &amp; P3b: ≥103%=5pts, ≥100%=4pts, ≥97%=3pts | P2: ≥95%=5pts, ≥85%=4pts, ≥75%=3pts | P3a: 100%=5pts, ≥90%=4pts, ≥80%=3pts
           </div>
         </div>
       </div>
-
-      <!-- ROI -->
-      <div class="calc-card" id="card-roi">
-        <div class="calc-header" onclick="toggleCard('card-roi')" aria-expanded="false" tabindex="0" role="button">
-          <div class="calc-icon" style="background:#F0FDF4;">
-            <svg viewBox="0 0 24 24" style="stroke:#15803D"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
-          </div>
-          <div>
-            <div class="calc-title">Return on Investment (ROI)</div>
-            <div class="calc-subtitle">Net return as % of investment cost</div>
-          </div>
-          <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-        </div>
-        <div class="calc-body">
-          <div class="field-grid">
-            <div class="field">
-              <label for="roi-gain">Net Gain ($)</label>
-              <input type="number" id="roi-gain" placeholder="50,000" />
-            </div>
-            <div class="field">
-              <label for="roi-cost">Investment Cost ($)</label>
-              <input type="number" id="roi-cost" placeholder="200,000" min="0.01" />
-            </div>
-            <div class="field">
-              <label for="roi-months">Period (months)</label>
-              <input type="number" id="roi-months" placeholder="12" min="1" />
-            </div>
-          </div>
-          <button class="calc-btn" onclick="calcROI()">Calculate</button>
-          <div class="result-grid" id="res-roi"></div>
-        </div>
-      </div>
-
-      <!-- Break-Even -->
-      <div class="calc-card" id="card-breakeven">
-        <div class="calc-header" onclick="toggleCard('card-breakeven')" aria-expanded="false" tabindex="0" role="button">
-          <div class="calc-icon" style="background:#FFF7ED;">
-            <svg viewBox="0 0 24 24" style="stroke:#B45309"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-          </div>
-          <div>
-            <div class="calc-title">Break-Even Analysis</div>
-            <div class="calc-subtitle">Units &amp; revenue to cover fixed costs</div>
-          </div>
-          <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-        </div>
-        <div class="calc-body">
-          <div class="field-grid">
-            <div class="field">
-              <label for="be-fixed">Fixed Costs ($)</label>
-              <input type="number" id="be-fixed" placeholder="100,000" min="0" />
-            </div>
-            <div class="field">
-              <label for="be-price">Price per Unit ($)</label>
-              <input type="number" id="be-price" placeholder="50" min="0.01" />
-            </div>
-            <div class="field">
-              <label for="be-vc">Variable Cost/Unit ($)</label>
-              <input type="number" id="be-vc" placeholder="20" min="0" />
-            </div>
-          </div>
-          <button class="calc-btn" onclick="calcBreakEven()">Calculate</button>
-          <div class="result-grid" id="res-breakeven"></div>
-        </div>
-      </div>
-
-      <p class="section-label">Efficiency</p>
-
-      <!-- EBITDA -->
-      <div class="calc-card" id="card-ebitda">
-        <div class="calc-header" onclick="toggleCard('card-ebitda')" aria-expanded="false" tabindex="0" role="button">
-          <div class="calc-icon" style="background:#F5F3FF;">
-            <svg viewBox="0 0 24 24" style="stroke:#6D28D9"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-          </div>
-          <div>
-            <div class="calc-title">EBITDA &amp; EBITDA Margin</div>
-            <div class="calc-subtitle">Earnings before interest, tax, D&amp;A</div>
-          </div>
-          <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-        </div>
-        <div class="calc-body">
-          <div class="field-grid">
-            <div class="field">
-              <label for="eb-revenue">Revenue ($)</label>
-              <input type="number" id="eb-revenue" placeholder="1,000,000" min="0" />
-            </div>
-            <div class="field">
-              <label for="eb-cogs">COGS ($)</label>
-              <input type="number" id="eb-cogs" placeholder="400,000" min="0" />
-            </div>
-            <div class="field">
-              <label for="eb-opex">OpEx ($)</label>
-              <input type="number" id="eb-opex" placeholder="150,000" min="0" />
-            </div>
-            <div class="field">
-              <label for="eb-da">Depreciation &amp; Amortization ($)</label>
-              <input type="number" id="eb-da" placeholder="30,000" min="0" />
-            </div>
-            <div class="field">
-              <label for="eb-interest">Interest ($)</label>
-              <input type="number" id="eb-interest" placeholder="10,000" min="0" />
-            </div>
-            <div class="field">
-              <label for="eb-tax2">Tax ($)</label>
-              <input type="number" id="eb-tax2" placeholder="50,000" min="0" />
-            </div>
-          </div>
-          <button class="calc-btn" onclick="calcEBITDA()">Calculate</button>
-          <div class="result-grid" id="res-ebitda"></div>
-        </div>
-      </div>
-
     </div>
 
-    <!-- ── HR PANEL ────────────────────────────────────────────── -->
-    <div class="panel" id="panel-hr" role="tabpanel">
-
-      <p class="section-label">Workforce Cost</p>
-
-      <!-- Salary Cost -->
-      <div class="calc-card open" id="card-salary">
-        <div class="calc-header" onclick="toggleCard('card-salary')" aria-expanded="true" tabindex="0" role="button">
-          <div class="calc-icon" style="background:#F0FDF4;">
-            <svg viewBox="0 0 24 24" style="stroke:#15803D"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          </div>
-          <div>
-            <div class="calc-title">Total Salary Cost</div>
-            <div class="calc-subtitle">Including benefits &amp; employer taxes</div>
-          </div>
+    <!-- ── QPB ────────────────────────────────────────────────── -->
+    <div class="panel" id="panel-qpb">
+      <div class="calc-card open" id="card-qpb">
+        <div class="calc-header" onclick="toggleCard('card-qpb')">
+          <div class="calc-icon" style="background:#F0FDF4;"><svg viewBox="0 0 24 24" style="stroke:#15803D"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div>
+          <div><div class="calc-title">QPB — Quarterly Performance Bonus</div><div class="calc-sub">Tea+Coffee+Nuts Value · Volume · Perfect Store</div></div>
           <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
         </div>
         <div class="calc-body">
-          <div class="field-grid">
-            <div class="field">
-              <label for="sc-headcount">Headcount</label>
-              <input type="number" id="sc-headcount" placeholder="50" min="1" />
-            </div>
-            <div class="field">
-              <label for="sc-avg-salary">Avg Salary/Year ($)</label>
-              <input type="number" id="sc-avg-salary" placeholder="60,000" min="0" />
-            </div>
-            <div class="field">
-              <label for="sc-benefits">Benefits Overhead (%)</label>
-              <input type="number" id="sc-benefits" placeholder="25" min="0" max="100" />
-            </div>
-            <div class="field">
-              <label for="sc-employer-tax">Employer Tax (%)</label>
-              <input type="number" id="sc-employer-tax" placeholder="7.65" min="0" max="100" />
-            </div>
+          <div class="wl-select-row">
+            <label for="qpb-wl">Work Level</label>
+            <select id="qpb-wl">
+              <option value="21000">WL1A — Max ₹21,000</option>
+              <option value="27375">WL1B — Max ₹27,375</option>
+              <option value="31000">WL1C — Max ₹31,000</option>
+            </select>
           </div>
-          <button class="calc-btn" onclick="calcSalaryCost()">Calculate</button>
-          <div class="result-grid" id="res-salary"></div>
-        </div>
-      </div>
 
-      <!-- Attrition Rate -->
-      <div class="calc-card" id="card-attrition">
-        <div class="calc-header" onclick="toggleCard('card-attrition')" aria-expanded="false" tabindex="0" role="button">
-          <div class="calc-icon" style="background:#FEF2F2;">
-            <svg viewBox="0 0 24 24" style="stroke:#B91C1C"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 17 22 17 22 11"/></svg>
-          </div>
-          <div>
-            <div class="calc-title">Attrition Rate</div>
-            <div class="calc-subtitle">Employee turnover &amp; replacement cost</div>
-          </div>
-          <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-        </div>
-        <div class="calc-body">
-          <div class="field-grid">
-            <div class="field">
-              <label for="att-left">Employees Left (period)</label>
-              <input type="number" id="att-left" placeholder="8" min="0" />
-            </div>
-            <div class="field">
-              <label for="att-avg">Avg Headcount (period)</label>
-              <input type="number" id="att-avg" placeholder="100" min="1" />
-            </div>
-            <div class="field">
-              <label for="att-replace-cost">Avg Replacement Cost ($)</label>
-              <input type="number" id="att-replace-cost" placeholder="15,000" min="0" />
+          <div class="param-block">
+            <div class="param-label">Category Value (Tea + Coffee + Nuts) — Full Business<span class="param-wt">Weightage 40%</span></div>
+            <div class="field-grid">
+              <div class="field"><label>Quarterly Target (₹)</label><input type="number" id="q1-tgt" placeholder="e.g. 1500000" /></div>
+              <div class="field"><label>Achievement (₹)</label><input type="number" id="q1-ach" placeholder="e.g. 1545000" /></div>
             </div>
           </div>
-          <button class="calc-btn" onclick="calcAttrition()">Calculate</button>
-          <div class="result-grid" id="res-attrition"></div>
+
+          <div class="param-block">
+            <div class="param-label">Volume — South: Tea / Non-South: Coffee<span class="param-wt">Weightage 40%</span></div>
+            <div class="field-grid">
+              <div class="field"><label>Volume Target</label><input type="number" id="q2-tgt" placeholder="e.g. 8000" /></div>
+              <div class="field"><label>Volume Achievement</label><input type="number" id="q2-ach" placeholder="e.g. 8200" /></div>
+            </div>
+          </div>
+
+          <div class="param-block">
+            <div class="param-label">Perfect Store — Tea, Coffee, Nuts (South ₹300 / NS Tea ₹200+rest ₹300)<span class="param-wt">Weightage 20%</span></div>
+            <div class="field-grid">
+              <div class="field"><label>Target Stores</label><input type="number" id="q3-tgt" placeholder="e.g. 150" /></div>
+              <div class="field"><label>Achieved Stores</label><input type="number" id="q3-ach" placeholder="e.g. 130" /></div>
+            </div>
+          </div>
+
+          <button class="calc-btn" onclick="calcQPB()">Calculate QPB</button>
+          <div class="result-grid" id="res-qpb"></div>
+
           <div class="tip">
-            <svg viewBox="0 0 24 24" width="14" height="14"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            Industry benchmark: healthy attrition is 10–15% annually. Above 20% signals retention issues.
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Value &amp; Volume slabs: ≥103%=5pts, ≥100%=4pts, ≥97%=3pts, ≥95%=2pts. Perfect Store: ≥85%=5pts, ≥75%=4pts, ≥65%=3pts
           </div>
         </div>
       </div>
-
-      <!-- Hiring Cost -->
-      <div class="calc-card" id="card-hiring">
-        <div class="calc-header" onclick="toggleCard('card-hiring')" aria-expanded="false" tabindex="0" role="button">
-          <div class="calc-icon" style="background:#EFF6FF;">
-            <svg viewBox="0 0 24 24" style="stroke:#1C4ED8"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          </div>
-          <div>
-            <div class="calc-title">Cost per Hire</div>
-            <div class="calc-subtitle">Total recruitment cost breakdown</div>
-          </div>
-          <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-        </div>
-        <div class="calc-body">
-          <div class="field-grid">
-            <div class="field">
-              <label for="h-internal">Internal Recruiter Cost ($)</label>
-              <input type="number" id="h-internal" placeholder="5,000" min="0" />
-            </div>
-            <div class="field">
-              <label for="h-external">External Agency Fee ($)</label>
-              <input type="number" id="h-external" placeholder="3,000" min="0" />
-            </div>
-            <div class="field">
-              <label for="h-ads">Job Ads &amp; Tools ($)</label>
-              <input type="number" id="h-ads" placeholder="500" min="0" />
-            </div>
-            <div class="field">
-              <label for="h-onboarding">Onboarding Cost ($)</label>
-              <input type="number" id="h-onboarding" placeholder="2,000" min="0" />
-            </div>
-            <div class="field">
-              <label for="h-hires">Number of Hires</label>
-              <input type="number" id="h-hires" placeholder="10" min="1" />
-            </div>
-          </div>
-          <button class="calc-btn" onclick="calcHiring()">Calculate</button>
-          <div class="result-grid" id="res-hiring"></div>
-        </div>
-      </div>
-
     </div>
 
-    <!-- ── GROWTH PANEL ────────────────────────────────────────── -->
-    <div class="panel" id="panel-growth" role="tabpanel">
+    <!-- ── WPG ────────────────────────────────────────────────── -->
+    <div class="panel" id="panel-wpg">
 
-      <p class="section-label">Growth Metrics</p>
-
-      <!-- MoM Growth -->
-      <div class="calc-card open" id="card-mom">
-        <div class="calc-header" onclick="toggleCard('card-mom')" aria-expanded="true" tabindex="0" role="button">
-          <div class="calc-icon" style="background:#F0FDF4;">
-            <svg viewBox="0 0 24 24" style="stroke:#15803D"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-          </div>
-          <div>
-            <div class="calc-title">Month-over-Month Growth</div>
-            <div class="calc-subtitle">MoM &amp; annualised growth rate</div>
-          </div>
+      <p class="section-divider">FF — WPG Scoring</p>
+      <div class="calc-card open" id="card-wpg-ff">
+        <div class="calc-header" onclick="toggleCard('card-wpg-ff')">
+          <div class="calc-icon" style="background:#F5F3FF;"><svg viewBox="0 0 24 24" style="stroke:#6D28D9"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+          <div><div class="calc-title">FF WPG Calculator</div><div class="calc-sub">QGP · Tea/Coffee Volume · EFOS · HHT Usage</div></div>
           <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
         </div>
         <div class="calc-body">
-          <div class="field-grid">
-            <div class="field">
-              <label for="mom-prev">Previous Month Value ($)</label>
-              <input type="number" id="mom-prev" placeholder="80,000" min="0.01" />
-            </div>
-            <div class="field">
-              <label for="mom-curr">Current Month Value ($)</label>
-              <input type="number" id="mom-curr" placeholder="95,000" min="0" />
+          <div class="param-block">
+            <div class="param-label">QGP — Overall Business<span class="param-wt">Weightage 30%</span></div>
+            <div class="field-grid">
+              <div class="field"><label>QGP Target (%)</label><input type="number" id="ff-qgp-tgt" placeholder="100" /></div>
+              <div class="field"><label>QGP Achieved (%)</label><input type="number" id="ff-qgp-ach" placeholder="e.g. 101.5" /></div>
             </div>
           </div>
-          <button class="calc-btn" onclick="calcMoM()">Calculate</button>
-          <div class="result-grid" id="res-mom"></div>
-        </div>
-      </div>
+          <div class="param-block">
+            <div class="param-label">Tea Volume (South) / Coffee (Non-South)<span class="param-wt">Weightage 30%</span></div>
+            <div class="field-grid">
+              <div class="field"><label>Volume Target</label><input type="number" id="ff-vol-tgt" placeholder="e.g. 500" /></div>
+              <div class="field"><label>Volume Achievement</label><input type="number" id="ff-vol-ach" placeholder="e.g. 515" /></div>
+            </div>
+          </div>
+          <div class="param-block">
+            <div class="param-label">EFOS (TN: min 25 bills/day · Rest: min 20 bills/day)<span class="param-wt">Weightage 20%</span></div>
+            <div class="field-grid">
+              <div class="field"><label>EFOS Target (bills)</label><input type="number" id="ff-efos-tgt" placeholder="e.g. 25" /></div>
+              <div class="field"><label>EFOS Achievement</label><input type="number" id="ff-efos-ach" placeholder="e.g. 23" /></div>
+            </div>
+          </div>
+          <div class="param-block">
+            <div class="param-label">HHT Usage — MOC Destination<span class="param-wt">Weightage 20%</span></div>
+            <div class="field-grid">
+              <div class="field"><label>HHT Target (%)</label><input type="number" id="ff-hht-tgt" placeholder="80" /></div>
+              <div class="field"><label>HHT Achievement (%)</label><input type="number" id="ff-hht-ach" placeholder="e.g. 85" /></div>
+            </div>
+          </div>
+          <button class="calc-btn" onclick="calcWPGFF()">Calculate FF WPG Score</button>
+          <div class="result-grid" id="res-wpg-ff"></div>
 
-      <!-- CAGR -->
-      <div class="calc-card" id="card-cagr">
-        <div class="calc-header" onclick="toggleCard('card-cagr')" aria-expanded="false" tabindex="0" role="button">
-          <div class="calc-icon" style="background:#EFF6FF;">
-            <svg viewBox="0 0 24 24" style="stroke:#1C4ED8"><path d="M3 3v18h18"/><polyline points="7 16 11 12 15 14 19 8"/></svg>
-          </div>
-          <div>
-            <div class="calc-title">CAGR</div>
-            <div class="calc-subtitle">Compound Annual Growth Rate</div>
-          </div>
-          <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-        </div>
-        <div class="calc-body">
-          <div class="field-grid">
-            <div class="field">
-              <label for="cagr-begin">Beginning Value ($)</label>
-              <input type="number" id="cagr-begin" placeholder="500,000" min="0.01" />
-            </div>
-            <div class="field">
-              <label for="cagr-end">Ending Value ($)</label>
-              <input type="number" id="cagr-end" placeholder="1,200,000" min="0" />
-            </div>
-            <div class="field">
-              <label for="cagr-years">Number of Years</label>
-              <input type="number" id="cagr-years" placeholder="5" min="0.1" />
-            </div>
-          </div>
-          <button class="calc-btn" onclick="calcCAGR()">Calculate</button>
-          <div class="result-grid" id="res-cagr"></div>
-        </div>
-      </div>
-
-      <p class="section-label">Customer Metrics</p>
-
-      <!-- CAC & LTV -->
-      <div class="calc-card" id="card-cac">
-        <div class="calc-header" onclick="toggleCard('card-cac')" aria-expanded="false" tabindex="0" role="button">
-          <div class="calc-icon" style="background:#F5F3FF;">
-            <svg viewBox="0 0 24 24" style="stroke:#6D28D9"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          </div>
-          <div>
-            <div class="calc-title">CAC &amp; LTV Ratio</div>
-            <div class="calc-subtitle">Customer acquisition &amp; lifetime value</div>
-          </div>
-          <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-        </div>
-        <div class="calc-body">
-          <div class="field-grid">
-            <div class="field">
-              <label for="cac-spend">Total Marketing + Sales Spend ($)</label>
-              <input type="number" id="cac-spend" placeholder="50,000" min="0" />
-            </div>
-            <div class="field">
-              <label for="cac-customers">New Customers Acquired</label>
-              <input type="number" id="cac-customers" placeholder="100" min="1" />
-            </div>
-            <div class="field">
-              <label for="cac-arpu">Avg Revenue per User/Year ($)</label>
-              <input type="number" id="cac-arpu" placeholder="1,200" min="0" />
-            </div>
-            <div class="field">
-              <label for="cac-margin">Gross Margin (%)</label>
-              <input type="number" id="cac-margin" placeholder="70" min="0" max="100" />
-            </div>
-            <div class="field">
-              <label for="cac-churn">Annual Churn Rate (%)</label>
-              <input type="number" id="cac-churn" placeholder="15" min="0.1" max="100" />
-            </div>
-          </div>
-          <button class="calc-btn" onclick="calcCAC()">Calculate</button>
-          <div class="result-grid" id="res-cac"></div>
           <div class="tip">
-            <svg viewBox="0 0 24 24" width="14" height="14"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            Healthy LTV:CAC ratio is 3:1 or higher. Below 1:1 means you lose money per customer.
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            QGP &amp; Volume scoring: ≥97%=3, ≥100%=4, ≥103%=5. EFOS &amp; HHT: ≥80%=3, ≥90%=4, ≥100%=5. Max WPG score = 5.
           </div>
         </div>
       </div>
 
-      <!-- Burn Rate -->
-      <div class="calc-card" id="card-burn">
-        <div class="calc-header" onclick="toggleCard('card-burn')" aria-expanded="false" tabindex="0" role="button">
-          <div class="calc-icon" style="background:#FEF2F2;">
-            <svg viewBox="0 0 24 24" style="stroke:#B91C1C"><path d="M12 2c0 0-5 5-5 10a5 5 0 0 0 10 0C17 7 12 2 12 2z"/><path d="M12 2s2 5 2 8a2 2 0 0 1-4 0c0-3 2-8 2-8z"/></svg>
-          </div>
-          <div>
-            <div class="calc-title">Burn Rate &amp; Runway</div>
-            <div class="calc-subtitle">Monthly cash burn &amp; months of runway</div>
-          </div>
+      <p class="section-divider">ASM — WPG Scoring</p>
+      <div class="calc-card" id="card-wpg-asm">
+        <div class="calc-header" onclick="toggleCard('card-wpg-asm')">
+          <div class="calc-icon" style="background:#EFF6FF;"><svg viewBox="0 0 24 24" style="stroke:#1C4ED8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+          <div><div class="calc-title">ASM WPG Calculator</div><div class="calc-sub">QGP · Tea Value · Perfect Store · Monthly ECO</div></div>
           <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
         </div>
         <div class="calc-body">
-          <div class="field-grid">
-            <div class="field">
-              <label for="burn-cash">Cash on Hand ($)</label>
-              <input type="number" id="burn-cash" placeholder="2,000,000" min="0" />
-            </div>
-            <div class="field">
-              <label for="burn-expenses">Monthly Operating Expenses ($)</label>
-              <input type="number" id="burn-expenses" placeholder="150,000" min="0.01" />
-            </div>
-            <div class="field">
-              <label for="burn-revenue">Monthly Revenue ($)</label>
-              <input type="number" id="burn-revenue" placeholder="80,000" min="0" />
+          <div class="param-block">
+            <div class="param-label">QGP — Consistent Delivery (HTS FnR &amp; Nuts)<span class="param-wt">Weightage 40%</span></div>
+            <div class="field-grid">
+              <div class="field"><label>QGP Target (%)</label><input type="number" id="asm-qgp-tgt" placeholder="100" /></div>
+              <div class="field"><label>QGP Achieved (%)</label><input type="number" id="asm-qgp-ach" placeholder="e.g. 102" /></div>
             </div>
           </div>
-          <button class="calc-btn" onclick="calcBurn()">Calculate</button>
-          <div class="result-grid" id="res-burn"></div>
+          <div class="param-block">
+            <div class="param-label">Tea Value — Quarterly Target vs Achievement<span class="param-wt">Weightage 30%</span></div>
+            <div class="field-grid">
+              <div class="field"><label>Tea Value Target (₹)</label><input type="number" id="asm-tv-tgt" placeholder="e.g. 2000000" /></div>
+              <div class="field"><label>Tea Value Achievement (₹)</label><input type="number" id="asm-tv-ach" placeholder="e.g. 1960000" /></div>
+            </div>
+          </div>
+          <div class="param-block">
+            <div class="param-label">Perfect Store — Monthly Achievement<span class="param-wt">Weightage 20%</span></div>
+            <div class="field-grid">
+              <div class="field"><label>PS Target (₹/store)</label><input type="number" id="asm-ps-tgt" placeholder="300" /></div>
+              <div class="field"><label>PS Achieved (%)</label><input type="number" id="asm-ps-ach" placeholder="e.g. 78" /></div>
+            </div>
+          </div>
+          <div class="param-block">
+            <div class="param-label">Monthly ECO (Coverage)<span class="param-wt">Weightage 10%</span></div>
+            <div class="field-grid">
+              <div class="field"><label>ECO Target (%)</label><input type="number" id="asm-eco-tgt" placeholder="100" /></div>
+              <div class="field"><label>ECO Achieved (%)</label><input type="number" id="asm-eco-ach" placeholder="e.g. 98" /></div>
+            </div>
+          </div>
+          <button class="calc-btn" onclick="calcWPGASM()">Calculate ASM WPG Score</button>
+          <div class="result-grid" id="res-wpg-asm"></div>
+
           <div class="tip">
-            <svg viewBox="0 0 24 24" width="14" height="14"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            Target 18+ months of runway before your next fundraise. Below 6 months is critical.
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            QGP: ≥97%=3, ≥100%=4, ≥103%=5. Tea Value: ≥95%=2, ≥97%=3, ≥99.6%=4, ≥103%=5. PS: ≥65%=3, ≥75%=4, ≥85%=5. ECO: ≥90%=3, ≥95%=4, ≥100%=5
           </div>
         </div>
       </div>
-
     </div>
-  </main>
 
-  <script>
-    // ── Helpers ────────────────────────────────────────────────
-    const fmt = (n, dec=2) => isNaN(n)||!isFinite(n) ? '—' : n.toLocaleString('en-US',{minimumFractionDigits:dec,maximumFractionDigits:dec});
-    const fmtPct = n => fmt(n) + '%';
-    const fmtDollar = n => '$' + fmt(n, 0);
-    const val = id => parseFloat(document.getElementById(id).value) || 0;
+    <!-- ── RSSM INCENTIVE ─────────────────────────────────────── -->
+    <div class="panel" id="panel-rssm">
 
-    function renderResults(containerId, items) {
-      const el = document.getElementById(containerId);
-      el.innerHTML = items.map(({label, value, unit, type='neutral'}) => `
-        <div class="result-card ${type}">
-          <div class="result-label">${label}</div>
-          <div class="result-value">${value}</div>
-          ${unit ? `<div class="result-unit">${unit}</div>` : ''}
+      <p class="section-divider">P1 — RSSM Incentive (Chennai ₹5,250 / Rest ₹3,000)</p>
+      <div class="calc-card open" id="card-rssm-p1">
+        <div class="calc-header" onclick="toggleCard('card-rssm-p1')">
+          <div class="calc-icon" style="background:#F0FDF4;"><svg viewBox="0 0 24 24" style="stroke:#15803D"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+          <div><div class="calc-title">RSSM P1 Incentive Calculator</div><div class="calc-sub">Measurement · EFOS · HHT Usage</div></div>
+          <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
         </div>
-      `).join('');
-      requestAnimationFrame(() => {
-        el.querySelectorAll('.result-card').forEach((c,i) => {
-          setTimeout(() => c.classList.add('show'), i * 60);
-        });
-      });
-    }
+        <div class="calc-body">
+          <div class="wl-select-row">
+            <label for="rssm-region">Region</label>
+            <select id="rssm-region" onchange="updateRSSMMax()">
+              <option value="3000">Rest of India — Max ₹3,000</option>
+              <option value="5250">Chennai (Non-3P) — Max ₹5,250</option>
+            </select>
+          </div>
 
-    // ── Toggle accordion ───────────────────────────────────────
-    function toggleCard(id) {
-      const card = document.getElementById(id);
-      const isOpen = card.classList.contains('open');
-      card.classList.toggle('open', !isOpen);
-      card.querySelector('.calc-header').setAttribute('aria-expanded', String(!isOpen));
-    }
+          <div class="param-block">
+            <div class="param-label">Measurement — Target vs Achievement<span class="param-wt">Weightage 50%</span></div>
+            <div class="field-grid">
+              <div class="field"><label>Target</label><input type="number" id="r1-tgt" placeholder="e.g. 500000" /></div>
+              <div class="field"><label>Achievement</label><input type="number" id="r1-ach" placeholder="e.g. 520000" /></div>
+            </div>
+          </div>
+          <div class="param-block">
+            <div class="param-label">EFOS (TN: min 25 bills · ROTN: min 20 bills)<span class="param-wt">Weightage 25%</span></div>
+            <div class="field-grid">
+              <div class="field"><label>EFOS Target (bills)</label><input type="number" id="r2-tgt" placeholder="e.g. 25" /></div>
+              <div class="field"><label>EFOS Achievement</label><input type="number" id="r2-ach" placeholder="e.g. 22" /></div>
+            </div>
+          </div>
+          <div class="param-block">
+            <div class="param-label">HHT Usage — Min 80% sales billing<span class="param-wt">Weightage 25%</span></div>
+            <div class="field-grid">
+              <div class="field"><label>HHT Target (%)</label><input type="number" id="r3-tgt" placeholder="80" /></div>
+              <div class="field"><label>HHT Achievement (%)</label><input type="number" id="r3-ach" placeholder="e.g. 85" /></div>
+            </div>
+          </div>
+          <button class="calc-btn" onclick="calcRSSMP1()">Calculate P1 Incentive</button>
+          <div class="result-grid" id="res-rssm-p1"></div>
+          <div class="tip">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            NOTE: HHT usage must be ≥80% for any incentive to be earned. Measurement slabs: ≥103%=100%, ≥99.6%=80%, ≥95%=60%
+          </div>
+        </div>
+      </div>
 
-    // ── Tab switching ──────────────────────────────────────────
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.tab-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
-        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-        btn.classList.add('active');
-        btn.setAttribute('aria-selected','true');
-        document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
-      });
-    });
+      <p class="section-divider">P2 — Salesman Incentive (Total ₹3,000)</p>
+      <div class="calc-card" id="card-rssm-p2">
+        <div class="calc-header" onclick="toggleCard('card-rssm-p2')">
+          <div class="calc-icon" style="background:#FFF7ED;"><svg viewBox="0 0 24 24" style="stroke:#B45309"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
+          <div><div class="calc-title">P2 Salesman Incentive Calculator</div><div class="calc-sub">RTD+Biscuits Value · RTD ECO · Biscuit ECO</div></div>
+          <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="calc-body">
+          <div class="param-block">
+            <div class="param-label">RTD + Biscuits Value — Target vs Achievement<span class="param-wt">Weightage 50%</span></div>
+            <div class="field-grid">
+              <div class="field"><label>Target (₹)</label><input type="number" id="p2v-tgt" placeholder="e.g. 300000" /></div>
+              <div class="field"><label>Achievement (₹)</label><input type="number" id="p2v-ach" placeholder="e.g. 310000" /></div>
+            </div>
+          </div>
+          <div class="param-block">
+            <div class="param-label">RTD ECO — RS ECO Target<span class="param-wt">Weightage 25%</span></div>
+            <div class="field-grid">
+              <div class="field"><label>RTD ECO Target (%)</label><input type="number" id="p2rtd-tgt" placeholder="100" /></div>
+              <div class="field"><label>RTD ECO Achieved (%)</label><input type="number" id="p2rtd-ach" placeholder="e.g. 88" /></div>
+            </div>
+          </div>
+          <div class="param-block">
+            <div class="param-label">Biscuit ECO — RS ECO Target<span class="param-wt">Weightage 25%</span></div>
+            <div class="field-grid">
+              <div class="field"><label>Biscuit ECO Target (%)</label><input type="number" id="p2bis-tgt" placeholder="100" /></div>
+              <div class="field"><label>Biscuit ECO Achieved (%)</label><input type="number" id="p2bis-ach" placeholder="e.g. 79" /></div>
+            </div>
+          </div>
+          <button class="calc-btn" onclick="calcRSSMP2()">Calculate P2 Incentive</button>
+          <div class="result-grid" id="res-rssm-p2"></div>
+          <div class="tip">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            P2 is only applicable in P2 towns where P2 salesman are available. Value slabs: ≥103%=100%, ≥99.6%=80%, ≥95%=60%. ECO slabs: ≥100%=100%, ≥85%=80%, ≥75%=70%
+          </div>
+        </div>
+      </div>
+    </div>
 
-    // Keyboard: Enter/Space on accordion headers
-    document.querySelectorAll('.calc-header').forEach(h => {
-      h.addEventListener('keydown', e => {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); h.click(); }
-      });
-    });
+    <!-- ── RS CDT ──────────────────────────────────────────────── -->
+    <div class="panel" id="panel-cdt">
+      <div class="calc-card open" id="card-cdt">
+        <div class="calc-header" onclick="toggleCard('card-cdt')">
+          <div class="calc-icon" style="background:#FEF2F2;"><svg viewBox="0 0 24 24" style="stroke:#B91C1C"><path d="M3 3v18h18"/><polyline points="7 16 11 12 15 14 19 8"/></svg></div>
+          <div><div class="calc-title">RS CDT — Quarterly Channel Development Target</div><div class="calc-sub">Exclusive HTS/IBS RS · TN &amp; Rest of TN</div></div>
+          <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="calc-body">
+          <div class="wl-select-row">
+            <label for="cdt-region">Region</label>
+            <select id="cdt-region">
+              <option value="tn">TN (Chennai)</option>
+              <option value="rotn">Rest of TN</option>
+            </select>
+          </div>
 
-    // ── CALCULATORS ────────────────────────────────────────────
+          <div class="param-block">
+            <div class="param-label">Secondary Sales — Quarterly Achievement</div>
+            <div class="field-grid">
+              <div class="field"><label>Quarterly Target (₹)</label><input type="number" id="cdt-sec-tgt" placeholder="e.g. 1000000" /></div>
+              <div class="field"><label>Quarterly Achievement (₹)</label><input type="number" id="cdt-sec-ach" placeholder="e.g. 1020000" /></div>
+            </div>
+          </div>
 
-    function calcMargin() {
-      const rev = val('pm-revenue'), cogs = val('pm-cogs'),
-            opex = val('pm-opex'), tax = val('pm-tax');
-      if (!rev) return;
-      const gross = rev - cogs;
-      const operating = gross - opex;
-      const netBeforeTax = operating;
-      const net = netBeforeTax * (1 - tax / 100);
-      renderResults('res-margin', [
-        { label: 'Gross Profit',    value: fmtDollar(gross),              type: gross >= 0 ? 'positive' : 'negative' },
-        { label: 'Gross Margin',    value: fmtPct(gross / rev * 100),     type: gross >= 0 ? 'positive' : 'negative' },
-        { label: 'Operating Profit',value: fmtDollar(operating),          type: operating >= 0 ? 'neutral' : 'negative' },
-        { label: 'Operating Margin',value: fmtPct(operating / rev * 100), type: operating >= 0 ? 'neutral' : 'negative' },
-        { label: 'Net Profit',      value: fmtDollar(net),                type: net >= 0 ? 'positive' : 'negative' },
-        { label: 'Net Margin',      value: fmtPct(net / rev * 100),       type: net >= 0 ? 'positive' : 'negative' },
-      ]);
-    }
+          <div class="param-block">
+            <div class="param-label" id="cdt-p2-label">3R + Topstar Value (TN) — Quarterly Achievement</div>
+            <div class="field-grid">
+              <div class="field"><label>Target (₹)</label><input type="number" id="cdt-p2-tgt" placeholder="e.g. 500000" /></div>
+              <div class="field"><label>Achievement (₹)</label><input type="number" id="cdt-p2-ach" placeholder="e.g. 515000" /></div>
+            </div>
+          </div>
 
-    function calcROI() {
-      const gain = val('roi-gain'), cost = val('roi-cost'), months = val('roi-months') || 12;
-      if (!cost) return;
-      const roi = (gain / cost) * 100;
-      const annualROI = (Math.pow(1 + roi / 100, 12 / months) - 1) * 100;
-      renderResults('res-roi', [
-        { label: 'ROI',              value: fmtPct(roi),        type: roi >= 0 ? 'positive' : 'negative' },
-        { label: 'Net Gain',         value: fmtDollar(gain),    type: gain >= 0 ? 'positive' : 'negative' },
-        { label: 'Annualised ROI',   value: fmtPct(annualROI),  type: annualROI >= 0 ? 'neutral' : 'negative' },
-        { label: 'Payback Period',   value: gain > 0 ? fmt(cost/gain*months, 1) : '—', unit: 'months', type: 'neutral' },
-      ]);
-    }
+          <button class="calc-btn" onclick="calcCDT()">Calculate CDT Payout Rate</button>
+          <div class="result-grid" id="res-cdt"></div>
 
-    function calcBreakEven() {
-      const fixed = val('be-fixed'), price = val('be-price'), vc = val('be-vc');
-      if (!price || price <= vc) return;
-      const cm = price - vc;
-      const units = fixed / cm;
-      const revenue = units * price;
-      renderResults('res-breakeven', [
-        { label: 'Break-Even Units',   value: fmt(units, 0), unit: 'units',   type: 'neutral' },
-        { label: 'Break-Even Revenue', value: fmtDollar(revenue),             type: 'warning' },
-        { label: 'Contribution Margin',value: fmtDollar(cm), unit: 'per unit',type: 'positive' },
-        { label: 'CM Ratio',           value: fmtPct(cm/price*100),           type: 'neutral' },
-      ]);
-    }
+          <div class="tip">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Secondary Sales slabs: ≥98%=0.05%, ≥100%=0.10%, ≥102%=0.15% of achievement. 3R+Topstar/Tea Vol slabs: ≥95%=0.05%, ≥100%=0.075%, ≥103%=0.10% of achievement. Payout based on quarterly MOC achievement.
+          </div>
+        </div>
+      </div>
+    </div>
 
-    function calcEBITDA() {
-      const rev = val('eb-revenue'), cogs = val('eb-cogs'), opex = val('eb-opex'),
-            da = val('eb-da'), interest = val('eb-interest'), tax2 = val('eb-tax2');
-      if (!rev) return;
-      const netIncome = rev - cogs - opex - da - interest - tax2;
-      const ebitda = netIncome + interest + tax2 + da;
-      renderResults('res-ebitda', [
-        { label: 'EBITDA',        value: fmtDollar(ebitda),              type: ebitda >= 0 ? 'positive' : 'negative' },
-        { label: 'EBITDA Margin', value: fmtPct(ebitda / rev * 100),     type: ebitda >= 0 ? 'positive' : 'negative' },
-        { label: 'Net Income',    value: fmtDollar(netIncome),           type: netIncome >= 0 ? 'neutral' : 'negative' },
-        { label: 'EBIT',          value: fmtDollar(ebitda - da),         type: 'neutral' },
-      ]);
-    }
+  </div><!-- end hts-section -->
+</main>
 
-    function calcSalaryCost() {
-      const hc = val('sc-headcount'), salary = val('sc-avg-salary'),
-            benefits = val('sc-benefits'), empTax = val('sc-employer-tax');
-      if (!hc || !salary) return;
-      const baseCost = hc * salary;
-      const totalCost = baseCost * (1 + benefits / 100 + empTax / 100);
-      const perEmployee = totalCost / hc;
-      renderResults('res-salary', [
-        { label: 'Annual Base Cost',  value: fmtDollar(baseCost),    type: 'neutral' },
-        { label: 'Total Cost/Year',   value: fmtDollar(totalCost),   type: 'warning' },
-        { label: 'Monthly Cost',      value: fmtDollar(totalCost/12),type: 'neutral' },
-        { label: 'Cost per Employee', value: fmtDollar(perEmployee), type: 'neutral' },
-        { label: 'Benefits Cost',     value: fmtDollar(baseCost * benefits / 100), type: 'neutral' },
-      ]);
-    }
+<script>
+// ── Navigation ─────────────────────────────────────────────
+function showHTS() {
+  document.getElementById('landing').style.display = 'none';
+  const s = document.getElementById('hts-section');
+  s.classList.add('show');
+  document.getElementById('backBtn').style.display = 'flex';
+}
+function showLanding() {
+  document.getElementById('landing').style.display = '';
+  const s = document.getElementById('hts-section');
+  s.classList.remove('show');
+  document.getElementById('backBtn').style.display = 'none';
+}
 
-    function calcAttrition() {
-      const left = val('att-left'), avg = val('att-avg'), replace = val('att-replace-cost');
-      if (!avg) return;
-      const rate = (left / avg) * 100;
-      const totalCost = left * replace;
-      renderResults('res-attrition', [
-        { label: 'Attrition Rate',    value: fmtPct(rate),         type: rate > 20 ? 'negative' : rate > 15 ? 'warning' : 'positive' },
-        { label: 'Employees Lost',    value: fmt(left, 0),         unit: 'people', type: 'neutral' },
-        { label: 'Total Replace Cost',value: fmtDollar(totalCost), type: 'negative' },
-        { label: 'Annual Projection', value: fmtDollar(totalCost * (12 / 12)), type: 'warning' },
-      ]);
-    }
+// ── Tabs ───────────────────────────────────────────────────
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+  });
+});
 
-    function calcHiring() {
-      const internal = val('h-internal'), external = val('h-external'),
-            ads = val('h-ads'), onboarding = val('h-onboarding'), hires = val('h-hires') || 1;
-      const total = internal + external + ads + onboarding;
-      const perHire = total / hires;
-      renderResults('res-hiring', [
-        { label: 'Total Recruiting Cost', value: fmtDollar(total),    type: 'warning' },
-        { label: 'Cost per Hire',         value: fmtDollar(perHire),  type: 'neutral' },
-        { label: 'Internal Cost',         value: fmtDollar(internal), type: 'neutral' },
-        { label: 'External Cost',         value: fmtDollar(external), type: 'neutral' },
-      ]);
-    }
+// ── Accordion ──────────────────────────────────────────────
+function toggleCard(id) {
+  const c = document.getElementById(id);
+  c.classList.toggle('open');
+}
 
-    function calcMoM() {
-      const prev = val('mom-prev'), curr = val('mom-curr');
-      if (!prev) return;
-      const mom = ((curr - prev) / prev) * 100;
-      const annualised = (Math.pow(1 + mom / 100, 12) - 1) * 100;
-      const change = curr - prev;
-      renderResults('res-mom', [
-        { label: 'MoM Growth',       value: fmtPct(mom),        type: mom >= 0 ? 'positive' : 'negative' },
-        { label: 'Change',           value: fmtDollar(change),  type: change >= 0 ? 'positive' : 'negative' },
-        { label: 'Annualised Rate',  value: fmtPct(annualised), type: annualised >= 0 ? 'neutral' : 'negative' },
-        { label: 'Current Value',    value: fmtDollar(curr),    type: 'neutral' },
-      ]);
-    }
+// ── CDT label update ───────────────────────────────────────
+document.getElementById('cdt-region').addEventListener('change', function() {
+  document.getElementById('cdt-p2-label').textContent =
+    this.value === 'tn' ? '3R + Topstar Value (TN) — Quarterly Achievement'
+                        : 'Tea Volume (Rest of TN) — Quarterly Achievement';
+});
 
-    function calcCAGR() {
-      const begin = val('cagr-begin'), end = val('cagr-end'), years = val('cagr-years');
-      if (!begin || !years) return;
-      const cagr = (Math.pow(end / begin, 1 / years) - 1) * 100;
-      const totalGrowth = ((end - begin) / begin) * 100;
-      renderResults('res-cagr', [
-        { label: 'CAGR',          value: fmtPct(cagr),        type: cagr >= 0 ? 'positive' : 'negative' },
-        { label: 'Total Growth',  value: fmtPct(totalGrowth), type: totalGrowth >= 0 ? 'neutral' : 'negative' },
-        { label: 'Value Added',   value: fmtDollar(end-begin),type: (end-begin) >= 0 ? 'positive' : 'negative' },
-        { label: 'Final Value',   value: fmtDollar(end),      type: 'neutral' },
-      ]);
-    }
+// ── Helpers ────────────────────────────────────────────────
+const v   = id => parseFloat(document.getElementById(id).value) || 0;
+const pct = (ach, tgt) => tgt > 0 ? (ach / tgt) * 100 : 0;
+const fmt  = (n, d=2) => isNaN(n)||!isFinite(n) ? '—' : n.toLocaleString('en-IN',{minimumFractionDigits:d,maximumFractionDigits:d});
+const fmtR = n => '₹' + fmt(n, 0);
+const fmtP = n => fmt(n) + '%';
 
-    function calcCAC() {
-      const spend = val('cac-spend'), customers = val('cac-customers') || 1,
-            arpu = val('cac-arpu'), margin = val('cac-margin'), churn = val('cac-churn') || 1;
-      const cac = spend / customers;
-      const ltv = (arpu * margin / 100) / (churn / 100);
-      const ratio = ltv / cac;
-      renderResults('res-cac', [
-        { label: 'CAC',           value: fmtDollar(cac),   type: 'warning' },
-        { label: 'LTV',           value: fmtDollar(ltv),   type: 'positive' },
-        { label: 'LTV:CAC Ratio', value: fmt(ratio,1) + ':1', type: ratio >= 3 ? 'positive' : ratio >= 1 ? 'warning' : 'negative' },
-        { label: 'CAC Payback',   value: fmt(cac / (arpu * margin / 100 / 12), 1), unit: 'months', type: 'neutral' },
-      ]);
-    }
+function renderResults(id, items) {
+  const el = document.getElementById(id);
+  el.innerHTML = items.map(({label, value, unit, type='neutral'}) => `
+    <div class="result-card ${type}">
+      <div class="result-label">${label}</div>
+      <div class="result-value">${value}</div>
+      ${unit ? `<div class="result-unit">${unit}</div>` : ''}
+    </div>`).join('');
+  requestAnimationFrame(() => {
+    el.querySelectorAll('.result-card').forEach((c,i) =>
+      setTimeout(() => c.classList.add('show'), i * 55));
+  });
+}
 
-    function calcBurn() {
-      const cash = val('burn-cash'), expenses = val('burn-expenses'), revenue = val('burn-revenue');
-      if (!expenses) return;
-      const grossBurn = expenses;
-      const netBurn = expenses - revenue;
-      const runway = netBurn > 0 ? cash / netBurn : Infinity;
-      renderResults('res-burn', [
-        { label: 'Gross Burn/Month', value: fmtDollar(grossBurn),                           type: 'negative' },
-        { label: 'Net Burn/Month',   value: netBurn > 0 ? fmtDollar(netBurn) : 'Cash Flow+',type: netBurn > 0 ? 'warning' : 'positive' },
-        { label: 'Runway',           value: isFinite(runway) ? fmt(runway, 1) : '∞',        unit: 'months', type: runway >= 18 ? 'positive' : runway >= 6 ? 'warning' : 'negative' },
-        { label: 'Cash on Hand',     value: fmtDollar(cash),                                 type: 'neutral' },
-      ]);
-    }
-  </script>
+// Score helpers
+function scoreP1(p) { // MGP & RTD — >=103=5, >=100=4, >=97=3, else 0
+  return p >= 103 ? 5 : p >= 100 ? 4 : p >= 97 ? 3 : 0;
+}
+function scoreP2(p) { // Growing OIs — >=95=5, >=85=4, >=75=3, else 0
+  return p >= 95 ? 5 : p >= 85 ? 4 : p >= 75 ? 3 : 0;
+}
+function scoreCoverage(p) { // 100%=5, >=90=4, >=80=3, else 0
+  return p >= 100 ? 5 : p >= 90 ? 4 : p >= 80 ? 3 : 0;
+}
+function scorePerfectStore(p) { // >=85=5, >=75=4, >=65=3, else 0
+  return p >= 85 ? 5 : p >= 75 ? 4 : p >= 65 ? 3 : 0;
+}
+function scoreQGP(p) { // >=103=5, >=100=4, >=97=3, else 0
+  return p >= 103 ? 5 : p >= 100 ? 4 : p >= 97 ? 3 : 0;
+}
+function scoreEFOSHHT(p) { // >=100=5, >=90=4, >=80=3, else 0
+  return p >= 100 ? 5 : p >= 90 ? 4 : p >= 80 ? 3 : 0;
+}
+function payoutPct(score) { // score -> payout %
+  return score >= 5 ? 1 : score >= 4 ? 0.8 : score >= 3 ? 0.6 : 0;
+}
 
+// ── PRP PAYOUT ─────────────────────────────────────────────
+function calcPRP() {
+  const maxPayout = v('prp-wl');
+  const p1Pct = pct(v('p1-ach'), v('p1-tgt'));
+  const p2Pct = pct(v('p2-ach'), v('p2-tgt'));
+  const p3aPct = pct(v('p3a-ach'), v('p3a-tgt'));
+  const p3bPct = pct(v('p3b-ach'), v('p3b-tgt'));
+
+  const s1 = scoreP1(p1Pct);
+  const s2 = scoreP2(p2Pct);
+  const s3a = scoreCoverage(p3aPct);
+  const s3b = scoreP1(p3bPct);
+
+  const p1Payout  = maxPayout * 0.40 * payoutPct(s1);
+  const p2Payout  = maxPayout * 0.20 * payoutPct(s2);
+  const p3aPayout = maxPayout * 0.20 * payoutPct(s3a);
+  const p3bPayout = maxPayout * 0.20 * payoutPct(s3b);
+  const total     = p1Payout + p2Payout + p3aPayout + p3bPayout;
+
+  renderResults('res-prp', [
+    { label: 'P1 % Ach', value: fmtP(p1Pct),  type: p1Pct>=103?'positive':p1Pct>=97?'neutral':'negative' },
+    { label: 'P2 % Ach', value: fmtP(p2Pct),  type: p2Pct>=95?'positive':p2Pct>=75?'neutral':'negative' },
+    { label: 'P3a % Ach',value: fmtP(p3aPct), type: p3aPct>=100?'positive':p3aPct>=80?'neutral':'negative' },
+    { label: 'P3b % Ach',value: fmtP(p3bPct), type: p3bPct>=103?'positive':p3bPct>=97?'neutral':'negative' },
+    { label: 'P1 Payout', value: fmtR(p1Payout),  type: s1>=4?'positive':s1>=3?'warning':'negative' },
+    { label: 'P2 Payout', value: fmtR(p2Payout),  type: s2>=4?'positive':s2>=3?'warning':'negative' },
+    { label: 'P3 Payout', value: fmtR(p3aPayout+p3bPayout), type: (s3a+s3b)>=6?'positive':'warning' },
+    { label: 'TOTAL PAYOUT', value: fmtR(total), unit: `of max ${fmtR(maxPayout)}`, type: 'payout' },
+  ]);
+}
+
+// ── QPB ────────────────────────────────────────────────────
+function calcQPB() {
+  const maxPayout = v('qpb-wl');
+  const p1Pct = pct(v('q1-ach'), v('q1-tgt'));
+  const p2Pct = pct(v('q2-ach'), v('q2-tgt'));
+  const p3Pct = pct(v('q3-ach'), v('q3-tgt'));
+
+  const s1 = scoreQGP(p1Pct);
+  // Volume: >=103=5, >=100=4, >=97=3, >=95=2, else 0
+  const s2 = p2Pct>=103?5:p2Pct>=100?4:p2Pct>=97?3:p2Pct>=95?2:0;
+  const s3 = scorePerfectStore(p3Pct);
+
+  const pp2 = s2>=5?1:s2>=4?0.8:s2>=3?0.6:s2>=2?0.4:0;
+  const p1Pay = maxPayout * 0.40 * payoutPct(s1);
+  const p2Pay = maxPayout * 0.40 * pp2;
+  const p3Pay = maxPayout * 0.20 * payoutPct(s3);
+  const total = p1Pay + p2Pay + p3Pay;
+
+  renderResults('res-qpb', [
+    { label: 'Value % Ach',   value: fmtP(p1Pct),  type: p1Pct>=103?'positive':p1Pct>=97?'neutral':'negative' },
+    { label: 'Volume % Ach',  value: fmtP(p2Pct),  type: p2Pct>=103?'positive':p2Pct>=95?'neutral':'negative' },
+    { label: 'Perf Store %',  value: fmtP(p3Pct),  type: p3Pct>=85?'positive':p3Pct>=65?'neutral':'negative' },
+    { label: 'Value Payout',  value: fmtR(p1Pay),  type: s1>=4?'positive':'warning' },
+    { label: 'Volume Payout', value: fmtR(p2Pay),  type: s2>=4?'positive':'warning' },
+    { label: 'Perf Store Pay',value: fmtR(p3Pay),  type: s3>=4?'positive':'warning' },
+    { label: 'TOTAL QPB', value: fmtR(total), unit: `of max ${fmtR(maxPayout)}`, type: 'payout' },
+  ]);
+}
+
+// ── WPG FF ─────────────────────────────────────────────────
+function calcWPGFF() {
+  const qgpPct  = pct(v('ff-qgp-ach'), v('ff-qgp-tgt'));
+  const volPct  = pct(v('ff-vol-ach'), v('ff-vol-tgt'));
+  const efosPct = pct(v('ff-efos-ach'), v('ff-efos-tgt'));
+  const hhtPct  = pct(v('ff-hht-ach'), v('ff-hht-tgt'));
+
+  const sQGP  = scoreQGP(qgpPct);
+  const sVol  = scoreQGP(volPct);
+  const sEFOS = scoreEFOSHHT(efosPct);
+  const sHHT  = scoreEFOSHHT(hhtPct);
+
+  const wpgScore = (sQGP*0.3 + sVol*0.3 + sEFOS*0.2 + sHHT*0.2);
+
+  renderResults('res-wpg-ff', [
+    { label: 'QGP % Ach',    value: fmtP(qgpPct),  type: qgpPct>=103?'positive':qgpPct>=97?'neutral':'negative' },
+    { label: 'Volume % Ach', value: fmtP(volPct),  type: volPct>=103?'positive':volPct>=97?'neutral':'negative' },
+    { label: 'EFOS % Ach',   value: fmtP(efosPct), type: efosPct>=100?'positive':efosPct>=80?'neutral':'negative' },
+    { label: 'HHT % Ach',    value: fmtP(hhtPct),  type: hhtPct>=100?'positive':hhtPct>=80?'neutral':'negative' },
+    { label: 'QGP Score',    value: fmt(sQGP,0)+'/5',  type: sQGP>=4?'positive':sQGP>=3?'neutral':'negative' },
+    { label: 'Vol Score',    value: fmt(sVol,0)+'/5',  type: sVol>=4?'positive':sVol>=3?'neutral':'negative' },
+    { label: 'EFOS Score',   value: fmt(sEFOS,0)+'/5', type: sEFOS>=4?'positive':sEFOS>=3?'neutral':'negative' },
+    { label: 'WPG SCORE',    value: fmt(wpgScore,2)+'/5', unit: 'Weighted Average', type: 'payout' },
+  ]);
+}
+
+// ── WPG ASM ────────────────────────────────────────────────
+function calcWPGASM() {
+  const qgpPct = pct(v('asm-qgp-ach'), v('asm-qgp-tgt'));
+  const tvPct  = pct(v('asm-tv-ach'),  v('asm-tv-tgt'));
+  const psPct  = v('asm-ps-ach');  // entered directly as %
+  const ecoPct = pct(v('asm-eco-ach'), v('asm-eco-tgt'));
+
+  const sQGP = scoreQGP(qgpPct);
+  // Tea Value: >=103=5, >=99.6=4, >=97=3, >=95=2, else 0
+  const sTV  = tvPct>=103?5:tvPct>=99.6?4:tvPct>=97?3:tvPct>=95?2:0;
+  // Perfect Store: >=85=5, >=75=4, >=65=3
+  const sPS  = psPct>=85?5:psPct>=75?4:psPct>=65?3:0;
+  // ECO: >=100=5, >=95=4, >=90=3
+  const sECO = ecoPct>=100?5:ecoPct>=95?4:ecoPct>=90?3:0;
+
+  const wpgScore = sQGP*0.4 + sTV*0.3 + sPS*0.2 + sECO*0.1;
+
+  renderResults('res-wpg-asm', [
+    { label: 'QGP % Ach',     value: fmtP(qgpPct), type: qgpPct>=103?'positive':qgpPct>=97?'neutral':'negative' },
+    { label: 'Tea Val % Ach', value: fmtP(tvPct),  type: tvPct>=103?'positive':tvPct>=97?'neutral':'negative' },
+    { label: 'Perf Store %',  value: fmtP(psPct),  type: psPct>=85?'positive':psPct>=65?'neutral':'negative' },
+    { label: 'ECO % Ach',     value: fmtP(ecoPct), type: ecoPct>=100?'positive':ecoPct>=90?'neutral':'negative' },
+    { label: 'QGP Score',     value: fmt(sQGP,0)+'/5', type: sQGP>=4?'positive':'neutral' },
+    { label: 'Tea Val Score', value: fmt(sTV,0)+'/5',  type: sTV>=4?'positive':'neutral' },
+    { label: 'PS Score',      value: fmt(sPS,0)+'/5',  type: sPS>=4?'positive':'neutral' },
+    { label: 'WPG SCORE',     value: fmt(wpgScore,2)+'/5', unit: 'Weighted Average', type: 'payout' },
+  ]);
+}
+
+// ── RSSM P1 ────────────────────────────────────────────────
+function calcRSSMP1() {
+  const maxPayout = v('rssm-region');
+  const measPct = pct(v('r1-ach'), v('r1-tgt'));
+  const efosPct = pct(v('r2-ach'), v('r2-tgt'));
+  const hhtPct  = pct(v('r3-ach'), v('r3-tgt'));
+
+  // HHT must be >=80% for any payout
+  if (hhtPct < 80) {
+    renderResults('res-rssm-p1', [
+      { label: 'HHT Achievement', value: fmtP(hhtPct), type: 'negative' },
+      { label: 'TOTAL INCENTIVE', value: '₹0', unit: 'HHT < 80% — No payout', type: 'negative' },
+    ]);
+    return;
+  }
+
+  // Measurement: >=103=100%, >=99.6=80%, >=95=60%
+  const measPayPct = measPct>=103?1:measPct>=99.6?0.8:measPct>=95?0.6:0;
+  // EFOS: >=90=100%, >=75=80%
+  const efosPayPct = efosPct>=90?1:efosPct>=75?0.8:0;
+  // HHT: >=90=100%, >=80=80%
+  const hhtPayPct  = hhtPct>=90?1:hhtPct>=80?0.8:0;
+
+  const measAmt = maxPayout * 0.50 * measPayPct;
+  const efosAmt = maxPayout * 0.25 * efosPayPct;
+  const hhtAmt  = maxPayout * 0.25 * hhtPayPct;
+  const total   = measAmt + efosAmt + hhtAmt;
+
+  renderResults('res-rssm-p1', [
+    { label: 'Meas % Ach',    value: fmtP(measPct), type: measPct>=103?'positive':measPct>=95?'neutral':'negative' },
+    { label: 'EFOS % Ach',    value: fmtP(efosPct), type: efosPct>=90?'positive':'warning' },
+    { label: 'HHT % Ach',     value: fmtP(hhtPct),  type: hhtPct>=90?'positive':'warning' },
+    { label: 'Meas Payout',   value: fmtR(measAmt), type: measPayPct>=1?'positive':'warning' },
+    { label: 'EFOS Payout',   value: fmtR(efosAmt), type: efosPayPct>=1?'positive':'warning' },
+    { label: 'HHT Payout',    value: fmtR(hhtAmt),  type: hhtPayPct>=1?'positive':'warning' },
+    { label: 'TOTAL INCENTIVE', value: fmtR(total), unit: `of max ${fmtR(maxPayout)}`, type: 'payout' },
+  ]);
+}
+
+// ── RSSM P2 ────────────────────────────────────────────────
+function calcRSSMP2() {
+  const maxPayout = 3000;
+  const valPct  = pct(v('p2v-ach'),   v('p2v-tgt'));
+  const rtdPct  = pct(v('p2rtd-ach'), v('p2rtd-tgt'));
+  const bisPct  = pct(v('p2bis-ach'), v('p2bis-tgt'));
+
+  const valPayPct = valPct>=103?1:valPct>=99.6?0.8:valPct>=95?0.6:0;
+  const rtdPayPct = rtdPct>=100?1:rtdPct>=85?0.8:rtdPct>=75?0.7:0;
+  const bisPayPct = bisPct>=100?1:bisPct>=85?0.8:bisPct>=75?0.7:0;
+
+  const valAmt = maxPayout * 0.50 * valPayPct;
+  const rtdAmt = maxPayout * 0.25 * rtdPayPct;
+  const bisAmt = maxPayout * 0.25 * bisPayPct;
+  const total  = valAmt + rtdAmt + bisAmt;
+
+  renderResults('res-rssm-p2', [
+    { label: 'Value % Ach',  value: fmtP(valPct),  type: valPct>=103?'positive':valPct>=95?'neutral':'negative' },
+    { label: 'RTD ECO %',    value: fmtP(rtdPct),  type: rtdPct>=100?'positive':rtdPct>=75?'neutral':'negative' },
+    { label: 'Biscuit ECO %',value: fmtP(bisPct),  type: bisPct>=100?'positive':bisPct>=75?'neutral':'negative' },
+    { label: 'Value Payout', value: fmtR(valAmt),  type: valPayPct>=1?'positive':'warning' },
+    { label: 'RTD Payout',   value: fmtR(rtdAmt),  type: rtdPayPct>=1?'positive':'warning' },
+    { label: 'TOTAL P2',     value: fmtR(total), unit: `of max ${fmtR(maxPayout)}`, type: 'payout' },
+  ]);
+}
+
+// ── RS CDT ─────────────────────────────────────────────────
+function calcCDT() {
+  const region   = document.getElementById('cdt-region').value;
+  const secTgt   = v('cdt-sec-tgt'), secAch = v('cdt-sec-ach');
+  const p2Tgt    = v('cdt-p2-tgt'),  p2Ach  = v('cdt-p2-ach');
+
+  const secPct = pct(secAch, secTgt);
+  const p2Pct  = pct(p2Ach,  p2Tgt);
+
+  // Secondary Sales payout rate
+  const secRate = secPct>=102?0.0015:secPct>=100?0.001:secPct>=98?0.0005:0;
+  // 3R+Topstar or Tea Volume payout rate
+  const p2Rate  = p2Pct>=103?0.001:p2Pct>=100?0.00075:p2Pct>=95?0.0005:0;
+
+  const secPayout = secAch * secRate;
+  const p2Payout  = p2Ach  * p2Rate;
+  const total     = secPayout + p2Payout;
+  const p2Label   = region === 'tn' ? '3R+Topstar Payout' : 'Tea Vol Payout';
+
+  renderResults('res-cdt', [
+    { label: 'Sec Sales % Ach', value: fmtP(secPct),      type: secPct>=102?'positive':secPct>=98?'neutral':'negative' },
+    { label: p2Label.replace(' Payout',' % Ach'), value: fmtP(p2Pct), type: p2Pct>=103?'positive':p2Pct>=95?'neutral':'negative' },
+    { label: 'Sec Sales Rate',  value: (secRate*100).toFixed(3)+'%', unit: 'of achievement', type: secRate>0?'neutral':'negative' },
+    { label: 'P2 Rate',         value: (p2Rate*100).toFixed(3)+'%', unit: 'of achievement', type: p2Rate>0?'neutral':'negative' },
+    { label: 'Sec Sales Pay',   value: fmtR(secPayout), type: secRate>=0.001?'positive':'warning' },
+    { label: p2Label,           value: fmtR(p2Payout),  type: p2Rate>=0.00075?'positive':'warning' },
+    { label: 'TOTAL CDT PAYOUT', value: fmtR(total), unit: 'Quarterly', type: 'payout' },
+  ]);
+}
+</script>
 </body>
 </html>
