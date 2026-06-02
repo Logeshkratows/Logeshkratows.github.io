@@ -6,6 +6,10 @@
   <title>HTS 2026 — Parameter Calculator</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- Download libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
     :root {
@@ -213,6 +217,30 @@
     .tip { font-size: 0.78rem; color: var(--muted); background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 7px; padding: 0.6rem 0.85rem; margin-top: 0.85rem; display: flex; gap: 0.5rem; align-items: flex-start; }
     .tip svg { flex-shrink: 0; margin-top: 1px; width: 13px; height: 13px; stroke: var(--accent); fill: none; stroke-width: 2; }
 
+    /* ── DOWNLOAD BAR ────────────────────────────────────────────── */
+    .download-bar {
+      display: none; align-items: center; gap: 0.6rem; flex-wrap: wrap;
+      margin-top: 1.1rem; padding-top: 1rem; border-top: 1px solid var(--border);
+    }
+    .download-bar.show { display: flex; animation: fadeUp 0.25s ease forwards; }
+    .download-label { font-size: 0.75rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-right: 0.2rem; }
+    .dl-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.45rem 1rem; border-radius: 7px; border: 1px solid var(--border);
+      font-family: inherit; font-size: 0.8rem; font-weight: 600; cursor: pointer;
+      transition: all var(--t); background: var(--surface);
+    }
+    .dl-btn svg { width: 14px; height: 14px; fill: none; stroke-width: 2; }
+    .dl-btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
+    .dl-btn.excel  { color: #166534; border-color: #BBF7D0; }
+    .dl-btn.excel:hover  { background: #F0FDF4; }
+    .dl-btn.pdf    { color: #991B1B; border-color: #FECACA; }
+    .dl-btn.pdf:hover    { background: #FEF2F2; }
+    .dl-btn.jpg    { color: #92400E; border-color: #FDE68A; }
+    .dl-btn.jpg:hover    { background: #FFFBEB; }
+    .dl-btn.png    { color: #5B21B6; border-color: #DDD6FE; }
+    .dl-btn.png:hover    { background: #F5F3FF; }
+
     /* ── ANIMATIONS ──────────────────────────────────────────────── */
     @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes popIn  { 0% { opacity: 0; transform: translateY(8px) scale(0.97); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
@@ -377,6 +405,13 @@
 
           <button class="calc-btn" onclick="calcPRP()">Calculate PRP Payout</button>
           <div class="result-grid" id="res-prp"></div>
+          <div class="download-bar" id="dl-prp">
+            <span class="download-label">Download</span>
+            <button class="dl-btn excel" onclick="dlExcel('res-prp','PRP_Payout')"><svg viewBox="0 0 24 24" stroke="#166534"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg> Excel</button>
+            <button class="dl-btn pdf"   onclick="dlPDF('res-prp','PRP_Payout')"><svg viewBox="0 0 24 24" stroke="#991B1B"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> PDF</button>
+            <button class="dl-btn jpg"   onclick="dlJPG('res-prp','PRP_Payout')"><svg viewBox="0 0 24 24" stroke="#92400E"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> JPG</button>
+            <button class="dl-btn png"   onclick="dlPNG('res-prp','PRP_Payout')"><svg viewBox="0 0 24 24" stroke="#5B21B6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> PNG</button>
+          </div>
 
           <div class="tip">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -430,6 +465,13 @@
 
           <button class="calc-btn" onclick="calcQPB()">Calculate QPB</button>
           <div class="result-grid" id="res-qpb"></div>
+          <div class="download-bar" id="dl-qpb">
+            <span class="download-label">Download</span>
+            <button class="dl-btn excel" onclick="dlExcel('res-qpb','QPB_Quarterly')"><svg viewBox="0 0 24 24" stroke="#166534"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Excel</button>
+            <button class="dl-btn pdf"   onclick="dlPDF('res-qpb','QPB_Quarterly')"><svg viewBox="0 0 24 24" stroke="#991B1B"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> PDF</button>
+            <button class="dl-btn jpg"   onclick="dlJPG('res-qpb','QPB_Quarterly')"><svg viewBox="0 0 24 24" stroke="#92400E"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> JPG</button>
+            <button class="dl-btn png"   onclick="dlPNG('res-qpb','QPB_Quarterly')"><svg viewBox="0 0 24 24" stroke="#5B21B6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> PNG</button>
+          </div>
 
           <div class="tip">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -480,6 +522,13 @@
           </div>
           <button class="calc-btn" onclick="calcWPGFF()">Calculate FF WPG Score</button>
           <div class="result-grid" id="res-wpg-ff"></div>
+          <div class="download-bar" id="dl-wpg-ff">
+            <span class="download-label">Download</span>
+            <button class="dl-btn excel" onclick="dlExcel('res-wpg-ff','WPG_FF')"><svg viewBox="0 0 24 24" stroke="#166534"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Excel</button>
+            <button class="dl-btn pdf"   onclick="dlPDF('res-wpg-ff','WPG_FF')"><svg viewBox="0 0 24 24" stroke="#991B1B"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> PDF</button>
+            <button class="dl-btn jpg"   onclick="dlJPG('res-wpg-ff','WPG_FF')"><svg viewBox="0 0 24 24" stroke="#92400E"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> JPG</button>
+            <button class="dl-btn png"   onclick="dlPNG('res-wpg-ff','WPG_FF')"><svg viewBox="0 0 24 24" stroke="#5B21B6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> PNG</button>
+          </div>
 
           <div class="tip">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -526,6 +575,13 @@
           </div>
           <button class="calc-btn" onclick="calcWPGASM()">Calculate ASM WPG Score</button>
           <div class="result-grid" id="res-wpg-asm"></div>
+          <div class="download-bar" id="dl-wpg-asm">
+            <span class="download-label">Download</span>
+            <button class="dl-btn excel" onclick="dlExcel('res-wpg-asm','WPG_ASM')"><svg viewBox="0 0 24 24" stroke="#166534"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Excel</button>
+            <button class="dl-btn pdf"   onclick="dlPDF('res-wpg-asm','WPG_ASM')"><svg viewBox="0 0 24 24" stroke="#991B1B"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> PDF</button>
+            <button class="dl-btn jpg"   onclick="dlJPG('res-wpg-asm','WPG_ASM')"><svg viewBox="0 0 24 24" stroke="#92400E"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> JPG</button>
+            <button class="dl-btn png"   onclick="dlPNG('res-wpg-asm','WPG_ASM')"><svg viewBox="0 0 24 24" stroke="#5B21B6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> PNG</button>
+          </div>
 
           <div class="tip">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -577,6 +633,13 @@
           </div>
           <button class="calc-btn" onclick="calcRSSMP1()">Calculate P1 Incentive</button>
           <div class="result-grid" id="res-rssm-p1"></div>
+          <div class="download-bar" id="dl-rssm-p1">
+            <span class="download-label">Download</span>
+            <button class="dl-btn excel" onclick="dlExcel('res-rssm-p1','RSSM_P1')"><svg viewBox="0 0 24 24" stroke="#166534"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Excel</button>
+            <button class="dl-btn pdf"   onclick="dlPDF('res-rssm-p1','RSSM_P1')"><svg viewBox="0 0 24 24" stroke="#991B1B"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> PDF</button>
+            <button class="dl-btn jpg"   onclick="dlJPG('res-rssm-p1','RSSM_P1')"><svg viewBox="0 0 24 24" stroke="#92400E"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> JPG</button>
+            <button class="dl-btn png"   onclick="dlPNG('res-rssm-p1','RSSM_P1')"><svg viewBox="0 0 24 24" stroke="#5B21B6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> PNG</button>
+          </div>
           <div class="tip">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
             NOTE: HHT usage must be ≥80% for any incentive to be earned. Measurement slabs: ≥103%=100%, ≥99.6%=80%, ≥95%=60%
@@ -615,6 +678,13 @@
           </div>
           <button class="calc-btn" onclick="calcRSSMP2()">Calculate P2 Incentive</button>
           <div class="result-grid" id="res-rssm-p2"></div>
+          <div class="download-bar" id="dl-rssm-p2">
+            <span class="download-label">Download</span>
+            <button class="dl-btn excel" onclick="dlExcel('res-rssm-p2','RSSM_P2')"><svg viewBox="0 0 24 24" stroke="#166534"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Excel</button>
+            <button class="dl-btn pdf"   onclick="dlPDF('res-rssm-p2','RSSM_P2')"><svg viewBox="0 0 24 24" stroke="#991B1B"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> PDF</button>
+            <button class="dl-btn jpg"   onclick="dlJPG('res-rssm-p2','RSSM_P2')"><svg viewBox="0 0 24 24" stroke="#92400E"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> JPG</button>
+            <button class="dl-btn png"   onclick="dlPNG('res-rssm-p2','RSSM_P2')"><svg viewBox="0 0 24 24" stroke="#5B21B6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> PNG</button>
+          </div>
           <div class="tip">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
             P2 is only applicable in P2 towns where P2 salesman are available. Value slabs: ≥103%=100%, ≥99.6%=80%, ≥95%=60%. ECO slabs: ≥100%=100%, ≥85%=80%, ≥75%=70%
@@ -658,6 +728,13 @@
 
           <button class="calc-btn" onclick="calcCDT()">Calculate CDT Payout Rate</button>
           <div class="result-grid" id="res-cdt"></div>
+          <div class="download-bar" id="dl-cdt">
+            <span class="download-label">Download</span>
+            <button class="dl-btn excel" onclick="dlExcel('res-cdt','RS_CDT')"><svg viewBox="0 0 24 24" stroke="#166534"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Excel</button>
+            <button class="dl-btn pdf"   onclick="dlPDF('res-cdt','RS_CDT')"><svg viewBox="0 0 24 24" stroke="#991B1B"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> PDF</button>
+            <button class="dl-btn jpg"   onclick="dlJPG('res-cdt','RS_CDT')"><svg viewBox="0 0 24 24" stroke="#92400E"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> JPG</button>
+            <button class="dl-btn png"   onclick="dlPNG('res-cdt','RS_CDT')"><svg viewBox="0 0 24 24" stroke="#5B21B6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> PNG</button>
+          </div>
 
           <div class="tip">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -715,6 +792,9 @@ const fmt  = (n, d=2) => isNaN(n)||!isFinite(n) ? '—' : n.toLocaleString('en-I
 const fmtR = n => '₹' + fmt(n, 0);
 const fmtP = n => fmt(n) + '%';
 
+// Store last results for download
+const _lastResults = {};
+
 function renderResults(id, items) {
   const el = document.getElementById(id);
   el.innerHTML = items.map(({label, value, unit, type='neutral'}) => `
@@ -727,6 +807,317 @@ function renderResults(id, items) {
     el.querySelectorAll('.result-card').forEach((c,i) =>
       setTimeout(() => c.classList.add('show'), i * 55));
   });
+  // Store and show download bar
+  _lastResults[id] = items;
+  const dlBar = document.getElementById('dl-' + id.replace('res-',''));
+  if (dlBar) dlBar.classList.add('show');
+}
+
+// ── DOWNLOAD FUNCTIONS ──────────────────────────────────────
+
+function dlExcel(resultId, filename) {
+  const items = _lastResults[resultId];
+  if (!items || !items.length) return;
+
+  const typeColor = {
+    positive: { bg: '22C55E', fg: '14532D' },
+    negative: { bg: 'EF4444', fg: '7F1D1D' },
+    warning:  { bg: 'F59E0B', fg: '78350F' },
+    neutral:  { bg: '3B82F6', fg: '1E3A8A' },
+    payout:   { bg: '0369A1', fg: 'FFFFFF' },
+  };
+
+  // Build rows
+  const titleRow  = ['HTS 2026 — ' + filename.replace(/_/g,' '), '', ''];
+  const dateRow   = ['Generated: ' + new Date().toLocaleString('en-IN'), '', ''];
+  const blankRow  = ['', '', ''];
+  const headerRow = ['PARAMETER', 'VALUE', 'UNIT'];
+  const dataRows  = items.map(i => [i.label, i.value, i.unit || '']);
+
+  const aoa = [titleRow, dateRow, blankRow, headerRow, ...dataRows];
+  const ws  = XLSX.utils.aoa_to_sheet(aoa);
+
+  ws['!cols'] = [{wch:32},{wch:22},{wch:18}];
+  ws['!rows'] = [{hpt:26},{hpt:16},{hpt:10},{hpt:20},...items.map(()=>({hpt:22}))];
+
+  // Title style
+  ws['A1'].s = {
+    font:  { bold: true, sz: 16, color: { rgb: 'FFFFFF' } },
+    fill:  { fgColor: { rgb: '0369A1' } },
+    alignment: { vertical: 'center' }
+  };
+  ws['B1'].s = ws['C1'].s = { fill: { fgColor: { rgb: '0369A1' } } };
+
+  // Date row
+  ['A2','B2','C2'].forEach(cell => {
+    if (!ws[cell]) ws[cell] = { t:'s', v:'' };
+    ws[cell].s = { font: { sz:9, italic:true, color:{rgb:'555555'} }, fill: { fgColor:{rgb:'E0F2FE'} } };
+  });
+  ws['A2'].v = dateRow[0];
+
+  // Header row (row 4)
+  ['A4','B4','C4'].forEach((cell,i) => {
+    ws[cell].s = {
+      font:  { bold: true, sz:10, color:{ rgb:'FFFFFF' } },
+      fill:  { fgColor:{ rgb:'1E3A8A' } },
+      alignment: { horizontal:'center', vertical:'center' },
+      border: { bottom:{ style:'medium', color:{rgb:'BFDBFE'} } }
+    };
+  });
+
+  // Data rows (row 5 onwards)
+  items.forEach((item, i) => {
+    const row   = i + 5;
+    const tc    = typeColor[item.type] || typeColor.neutral;
+    const isAlt = i % 2 === 0;
+    const bg    = isAlt ? 'F8FAFC' : 'FFFFFF';
+
+    const cellA = XLSX.utils.encode_cell({r: row-1, c:0});
+    const cellB = XLSX.utils.encode_cell({r: row-1, c:1});
+    const cellC = XLSX.utils.encode_cell({r: row-1, c:2});
+
+    ws[cellA].s = {
+      font:  { sz:9, color:{ rgb:'0F172A' } },
+      fill:  { fgColor:{ rgb: bg } },
+      alignment: { vertical:'center' }
+    };
+    ws[cellB].s = {
+      font:  { bold:true, sz:11, color:{ rgb: tc.fg } },
+      fill:  { fgColor:{ rgb: tc.bg + '22' } },
+      alignment: { horizontal:'center', vertical:'center' }
+    };
+    ws[cellC].s = {
+      font:  { sz:8, color:{ rgb:'868E96' }, italic:true },
+      fill:  { fgColor:{ rgb: bg } },
+      alignment: { vertical:'center' }
+    };
+
+    // Payout row gets full highlight
+    if (item.type === 'payout') {
+      [cellA, cellB, cellC].forEach(cell => {
+        ws[cell].s.fill = { fgColor:{ rgb:'0369A1' } };
+        ws[cell].s.font = { ...ws[cell].s.font, bold:true, color:{ rgb:'FFFFFF' } };
+      });
+    }
+  });
+
+  // Merge title across columns
+  ws['!merges'] = [
+    { s:{r:0,c:0}, e:{r:0,c:2} },
+    { s:{r:1,c:0}, e:{r:1,c:2} },
+    { s:{r:2,c:0}, e:{r:2,c:2} },
+  ];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, filename.slice(0,31));
+  XLSX.writeFile(wb, filename + '_' + _dateStr() + '.xlsx');
+}
+
+function dlPDF(resultId, filename) {
+  const items = _lastResults[resultId];
+  if (!items || !items.length) return;
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const title = 'HTS 2026 — ' + filename.replace(/_/g,' ');
+  const date  = 'Generated: ' + new Date().toLocaleString('en-IN');
+
+  // Gradient-style header band
+  doc.setFillColor(3, 105, 161);
+  doc.rect(0, 0, 210, 32, 'F');
+  doc.setFillColor(28, 78, 216);
+  doc.rect(150, 0, 60, 32, 'F');
+
+  // Logo block
+  doc.setFillColor(255,255,255);
+  doc.roundedRect(12, 7, 18, 18, 3, 3, 'F');
+  doc.setFillColor(3, 105, 161);
+  doc.setFontSize(11); doc.setFont('helvetica','bold');
+  doc.setTextColor(3,105,161);
+  doc.text('HTS', 15, 19);
+
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(14); doc.setFont('helvetica','bold');
+  doc.text(title, 35, 14);
+  doc.setFontSize(8.5); doc.setFont('helvetica','normal');
+  doc.setTextColor(186,230,253);
+  doc.text(date, 35, 23);
+
+  // Sub-header bar
+  doc.setFillColor(30, 58, 138);
+  doc.rect(0, 32, 210, 10, 'F');
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(7.5); doc.setFont('helvetica','bold');
+  doc.text('PARAMETER', 14, 39);
+  doc.text('VALUE', 118, 39);
+  doc.text('UNIT', 163, 39);
+
+  // Color map per type
+  const rowColors = {
+    positive: { bg:[220,252,231], val:[21,128,61],   label:[15,23,42] },
+    negative: { bg:[254,226,226], val:[185,28,28],   label:[15,23,42] },
+    warning:  { bg:[254,243,199], val:[146,64,14],   label:[15,23,42] },
+    neutral:  { bg:[239,246,255], val:[28,78,216],   label:[15,23,42] },
+    payout:   { bg:[3,105,161],   val:[255,255,255], label:[186,230,253] },
+  };
+
+  let y = 50;
+  const rowH = 12;
+
+  items.forEach((item, i) => {
+    if (y + rowH > 275) {
+      doc.addPage();
+      doc.setFillColor(30,58,138); doc.rect(0,0,210,10,'F');
+      doc.setTextColor(255,255,255); doc.setFontSize(7.5); doc.setFont('helvetica','bold');
+      doc.text('PARAMETER',14,7); doc.text('VALUE',118,7); doc.text('UNIT',163,7);
+      y = 18;
+    }
+
+    const c = rowColors[item.type] || rowColors.neutral;
+    doc.setFillColor(...c.bg);
+    doc.rect(10, y - 6, 190, rowH, 'F');
+
+    // Left border accent
+    doc.setFillColor(...c.val);
+    doc.rect(10, y - 6, 3, rowH, 'F');
+
+    // Param label
+    doc.setFontSize(9); doc.setFont('helvetica','normal');
+    doc.setTextColor(...c.label);
+    doc.text(String(item.label), 16, y);
+
+    // Value — larger, bold, colored
+    doc.setFontSize(11); doc.setFont('helvetica','bold');
+    doc.setTextColor(...c.val);
+    doc.text(String(item.value), 118, y);
+
+    // Unit
+    doc.setFontSize(7.5); doc.setFont('helvetica','normal');
+    doc.setTextColor(...(item.type==='payout'?[186,230,253]:[134,142,150]));
+    doc.text(String(item.unit||''), 163, y);
+
+    // Row separator
+    doc.setDrawColor(220,220,220);
+    doc.line(10, y + rowH - 6, 200, y + rowH - 6);
+
+    y += rowH;
+  });
+
+  // Footer
+  doc.setFillColor(248,249,250);
+  doc.rect(0, 280, 210, 17, 'F');
+  doc.setFontSize(7.5); doc.setFont('helvetica','normal');
+  doc.setTextColor(134,142,150);
+  doc.text('HTS 2026 Parameter Calculator  |  Internal Use Only', 14, 289);
+  doc.setTextColor(28,78,216);
+  doc.text('Page ' + doc.internal.getCurrentPageInfo().pageNumber, 185, 289);
+
+  doc.save(filename + '_' + _dateStr() + '.pdf');
+}
+
+async function dlJPG(resultId, filename) {
+  await _dlImage(resultId, filename, 'jpg');
+}
+async function dlPNG(resultId, filename) {
+  await _dlImage(resultId, filename, 'png');
+}
+
+async function _dlImage(resultId, filename, fmt) {
+  const items = _lastResults[resultId] || [];
+  if (!items.length) return;
+
+  const bgMap = {
+    positive: { card:'#F0FDF4', val:'#15803D', border:'#86EFAC' },
+    negative: { card:'#FEF2F2', val:'#B91C1C', border:'#FCA5A5' },
+    warning:  { card:'#FFFBEB', val:'#B45309', border:'#FDE68A' },
+    neutral:  { card:'#EFF6FF', val:'#1C4ED8', border:'#BFDBFE' },
+    payout:   { card:'#0369A1', val:'#FFFFFF', border:'#0284C7' },
+  };
+
+  const wrap = document.createElement('div');
+  wrap.style.cssText = [
+    'position:fixed;left:-9999px;top:0;',
+    'background:linear-gradient(135deg,#F8FAFC 0%,#EFF6FF 100%);',
+    'padding:28px;border-radius:16px;',
+    'font-family:IBM Plex Sans,Arial,sans-serif;width:660px;',
+    'box-shadow:0 8px 32px rgba(0,0,0,0.18);'
+  ].join('');
+
+  // Header
+  const hdr = document.createElement('div');
+  hdr.style.cssText = [
+    'background:linear-gradient(135deg,#0369A1,#1C4ED8);',
+    'border-radius:12px;padding:18px 22px;margin-bottom:20px;',
+    'display:flex;align-items:center;gap:14px;'
+  ].join('');
+  hdr.innerHTML = `
+    <div style="background:rgba(255,255,255,0.2);border-radius:10px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+      <span style="font-size:22px;font-weight:900;color:#fff;letter-spacing:-1px;">H</span>
+    </div>
+    <div>
+      <div style="font-size:16px;font-weight:700;color:#fff;letter-spacing:-0.3px;">HTS 2026 — ${filename.replace(/_/g,' ')}</div>
+      <div style="font-size:11px;color:#BAE6FD;margin-top:3px;">${new Date().toLocaleString('en-IN')}</div>
+    </div>`;
+  wrap.appendChild(hdr);
+
+  // Cards grid
+  const grid = document.createElement('div');
+  const cols = items.length <= 4 ? 2 : 3;
+  grid.style.cssText = `display:grid;grid-template-columns:repeat(${cols},1fr);gap:12px;`;
+
+  items.forEach(item => {
+    const t = item.type || 'neutral';
+    const c = bgMap[t] || bgMap.neutral;
+    const isPayout = t === 'payout';
+    const card = document.createElement('div');
+    card.style.cssText = [
+      `background:${c.card};`,
+      `border:1.5px solid ${c.border};`,
+      'border-radius:10px;padding:14px 16px;',
+      isPayout ? 'grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;' : ''
+    ].join('');
+
+    if (isPayout) {
+      card.innerHTML = `
+        <div style="font-size:11px;font-weight:700;color:${isPayout?'#BAE6FD':'#6B7280'};text-transform:uppercase;letter-spacing:.07em;">${item.label}</div>
+        <div style="display:flex;align-items:baseline;gap:6px;">
+          <div style="font-size:28px;font-weight:800;color:${c.val};letter-spacing:-1px;">${item.value}</div>
+          ${item.unit?`<div style="font-size:11px;color:${isPayout?'#BAE6FD':'#9CA3AF'};">${item.unit}</div>`:''}
+        </div>`;
+    } else {
+      card.innerHTML = `
+        <div style="font-size:10px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;">${item.label}</div>
+        <div style="font-size:22px;font-weight:800;color:${c.val};letter-spacing:-0.5px;line-height:1.1;">${item.value}</div>
+        ${item.unit?`<div style="font-size:10px;color:#9CA3AF;margin-top:4px;">${item.unit}</div>`:''}`;
+    }
+    grid.appendChild(card);
+  });
+  wrap.appendChild(grid);
+
+  // Footer
+  const foot = document.createElement('div');
+  foot.style.cssText = 'margin-top:16px;padding-top:12px;border-top:1px solid #E2E8F0;display:flex;justify-content:space-between;align-items:center;';
+  foot.innerHTML = `
+    <span style="font-size:10px;color:#94A3B8;">HTS 2026 Parameter Calculator · Internal Use Only</span>
+    <span style="font-size:10px;font-weight:600;color:#1C4ED8;">© ${new Date().getFullYear()}</span>`;
+  wrap.appendChild(foot);
+
+  document.body.appendChild(wrap);
+  try {
+    const canvas = await html2canvas(wrap, { scale: 2.5, backgroundColor: null, useCORS: true, logging: false });
+    const link = document.createElement('a');
+    const mimeType = fmt === 'png' ? 'image/png' : 'image/jpeg';
+    const quality  = fmt === 'png' ? 1 : 0.96;
+    link.download = filename + '_' + _dateStr() + '.' + fmt;
+    link.href = canvas.toDataURL(mimeType, quality);
+    link.click();
+  } finally {
+    document.body.removeChild(wrap);
+  }
+}
+
+function _dateStr() {
+  const d = new Date();
+  return d.getFullYear() + ('0'+(d.getMonth()+1)).slice(-2) + ('0'+d.getDate()).slice(-2);
 }
 
 // Score helpers
