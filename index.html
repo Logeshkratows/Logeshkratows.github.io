@@ -3,1355 +3,642 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HTS 2026 — Parameter Calculator</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <!-- Download libraries -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <meta name="description" content="Fresh, locally grown microgreens. Explore varieties, nutrition, growing methods, subscriptions and a professional microgreens business calculator." />
+  <meta name="theme-color" content="#123b2a" />
+  <title>GreenSprout Microgreens | Fresh. Local. Living Nutrition.</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+
   <style>
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-    :root {
-      --bg:       #F8F9FA;
-      --surface:  #FFFFFF;
-      --surface2: #F1F3F5;
-      --border:   #DEE2E6;
-      --text:     #0F172A;
-      --muted:    #495057;
-      --subtle:   #868E96;
-      --accent:   #1C4ED8;
-      --success:  #15803D;
-      --warning:  #B45309;
-      --danger:   #B91C1C;
-      --hts:      #0369A1;
-      --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
-      --shadow-md: 0 4px 16px rgba(0,0,0,0.10);
-      --shadow-lg: 0 8px 32px rgba(0,0,0,0.14);
-      --r: 12px;
-      --t: 200ms ease;
-    }
-    html { scroll-behavior: smooth; font-size: 16px; }
-    body { font-family: 'IBM Plex Sans', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; overflow-x: hidden; }
-
-    /* ── HEADER ─────────────────────────────────────────────────── */
-    header {
-      background: var(--surface); border-bottom: 1px solid var(--border);
-      position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow-sm);
-    }
-    .header-inner {
-      max-width: 1140px; margin: 0 auto; padding: 0 1.5rem;
-      height: 58px; display: flex; align-items: center; justify-content: space-between;
-    }
-    .logo { display: flex; align-items: center; gap: 0.6rem; font-size: 1rem; font-weight: 700; color: var(--text); letter-spacing: -0.02em; }
-    .logo-icon { width: 30px; height: 30px; background: var(--hts); border-radius: 7px; display: flex; align-items: center; justify-content: center; }
-    .logo-icon svg { width: 16px; height: 16px; stroke: #fff; fill: none; stroke-width: 2; }
-    .back-btn {
-      display: none; align-items: center; gap: 0.4rem; padding: 0.4rem 0.9rem;
-      background: var(--surface2); border: 1px solid var(--border); border-radius: 7px;
-      font-family: inherit; font-size: 0.82rem; font-weight: 600; color: var(--muted); cursor: pointer;
-      transition: all var(--t);
-    }
-    .back-btn:hover { background: var(--border); color: var(--text); }
-    .back-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; }
-
-    /* ── MAIN ────────────────────────────────────────────────────── */
-    main { max-width: 1140px; margin: 0 auto; padding: 2.5rem 1.5rem 5rem; }
-
-    /* ── LANDING ─────────────────────────────────────────────────── */
-    #landing { animation: fadeUp 0.5s ease forwards; }
-    .landing-title { text-align: center; margin-bottom: 3rem; }
-    .landing-title h1 { font-size: clamp(1.6rem, 4vw, 2.2rem); font-weight: 700; letter-spacing: -0.03em; }
-    .landing-title p { color: var(--muted); margin-top: 0.4rem; font-size: 0.95rem; }
-
-    .category-grid {
-      display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem;
-      max-width: 900px; margin: 0 auto;
-    }
-    .cat-card {
-      background: var(--surface); border: 2px solid var(--border);
-      border-radius: 16px; padding: 2.5rem 1rem;
-      text-align: center; cursor: pointer;
-      transition: all var(--t); position: relative; overflow: hidden;
-    }
-    .cat-card::before {
-      content: ''; position: absolute; inset: 0;
-      background: linear-gradient(135deg, transparent, rgba(28,78,216,0.04));
-      opacity: 0; transition: opacity var(--t);
-    }
-    .cat-card:hover { border-color: var(--accent); box-shadow: var(--shadow-md); transform: translateY(-4px); }
-    .cat-card:hover::before { opacity: 1; }
-    .cat-card.active-cat { border-color: var(--hts); background: #EFF6FF; }
-    .cat-card.disabled { opacity: 0.45; cursor: not-allowed; }
-    .cat-card.disabled:hover { transform: none; border-color: var(--border); box-shadow: none; }
-    .cat-icon { font-size: 2.8rem; margin-bottom: 0.8rem; display: block; }
-    .cat-name { font-size: 1.4rem; font-weight: 700; letter-spacing: 0.02em; color: var(--text); }
-    .cat-desc { font-size: 0.75rem; color: var(--subtle); margin-top: 0.3rem; }
-    .cat-badge {
-      display: inline-block; margin-top: 0.7rem;
-      font-size: 0.68rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
-      padding: 0.2rem 0.7rem; border-radius: 100px;
-    }
-    .badge-active { background: #DCFCE7; color: var(--success); }
-    .badge-soon   { background: #F3F4F6; color: var(--subtle); }
-
-    /* ── HTS SECTION ─────────────────────────────────────────────── */
-    #hts-section { display: none; }
-    #hts-section.show { display: block; animation: fadeUp 0.35s ease forwards; }
-
-    .section-hero {
-      background: linear-gradient(135deg, #0369A1, #1C4ED8);
-      border-radius: 14px; padding: 1.8rem 2rem; margin-bottom: 2rem; color: #fff;
-      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
-    }
-    .section-hero h2 { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.02em; }
-    .section-hero p  { font-size: 0.85rem; opacity: 0.85; margin-top: 0.2rem; }
-    .hero-pills { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-    .hero-pill {
-      background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3);
-      border-radius: 100px; padding: 0.25rem 0.8rem; font-size: 0.75rem; font-weight: 600;
+    :root{
+      --ink:#10241a;
+      --muted:#607168;
+      --cream:#f7f8f1;
+      --card:#ffffff;
+      --line:#dfe7df;
+      --green-950:#0b2a1b;
+      --green-900:#123b2a;
+      --green-800:#185239;
+      --green-700:#26734d;
+      --green-600:#32945f;
+      --green-500:#55b879;
+      --green-100:#e7f4e9;
+      --lime:#d8ef85;
+      --gold:#dcae4f;
+      --danger:#b43c35;
+      --shadow:0 18px 55px rgba(16,36,26,.10);
+      --shadow-sm:0 7px 24px rgba(16,36,26,.07);
+      --radius:22px;
+      --ease:220ms cubic-bezier(.2,.8,.2,1);
     }
 
-    /* ── TAB NAV ─────────────────────────────────────────────────── */
-    .tab-nav {
-      display: flex; gap: 0.2rem; flex-wrap: wrap;
-      background: var(--surface2); border: 1px solid var(--border);
-      border-radius: var(--r); padding: 0.3rem; margin-bottom: 2rem;
+    *,*::before,*::after{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      color:var(--ink);
+      background:var(--cream);
+      font-family:"DM Sans",system-ui,sans-serif;
+      line-height:1.6;
+      overflow-x:hidden;
     }
-    .tab-btn {
-      padding: 0.5rem 1.1rem; border: none; background: transparent;
-      font-family: inherit; font-size: 0.83rem; font-weight: 500;
-      color: var(--muted); border-radius: 8px; cursor: pointer; white-space: nowrap;
-      transition: all var(--t);
+    a{color:inherit;text-decoration:none}
+    button,input,select{font:inherit}
+    button{cursor:pointer}
+    img{max-width:100%;display:block}
+    .container{width:min(1180px,calc(100% - 40px));margin:auto}
+
+    /* Navigation */
+    .nav-wrap{
+      position:sticky;top:0;z-index:1000;
+      background:rgba(247,248,241,.90);
+      backdrop-filter:blur(16px);
+      border-bottom:1px solid rgba(223,231,223,.85);
     }
-    .tab-btn:hover { color: var(--text); background: rgba(255,255,255,0.7); }
-    .tab-btn.active { background: var(--surface); color: var(--accent); box-shadow: var(--shadow-sm); font-weight: 600; }
-
-    .panel { display: none; }
-    .panel.active { display: block; animation: fadeUp 0.25s ease forwards; }
-
-    /* ── CALC CARD ───────────────────────────────────────────────── */
-    .calc-card {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--r); box-shadow: var(--shadow-sm);
-      margin-bottom: 1.5rem; overflow: hidden; transition: box-shadow var(--t);
+    nav{height:76px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+    .brand{display:flex;align-items:center;gap:11px;font-family:Manrope;font-weight:800}
+    .brand-mark{
+      width:42px;height:42px;border-radius:13px;
+      display:grid;place-items:center;
+      background:var(--green-900);color:white;
+      box-shadow:0 7px 18px rgba(18,59,42,.22)
     }
-    .calc-card:hover { box-shadow: var(--shadow-md); }
-    .calc-header {
-      display: flex; align-items: center; gap: 0.75rem;
-      padding: 1rem 1.4rem; border-bottom: 1px solid var(--border);
-      cursor: pointer; user-select: none;
+    .brand-mark svg{width:24px}
+    .brand small{display:block;color:var(--muted);font:600 10px/1 Manrope;letter-spacing:.12em;text-transform:uppercase;margin-top:3px}
+    .nav-links{display:flex;gap:28px;align-items:center;font-size:14px;font-weight:600;color:#3e5047}
+    .nav-links a{transition:color var(--ease)}
+    .nav-links a:hover{color:var(--green-700)}
+    .nav-cta,.btn-primary{
+      border:0;background:var(--green-900);color:#fff;border-radius:999px;
+      padding:12px 19px;font-weight:700;box-shadow:0 8px 20px rgba(18,59,42,.17);
+      transition:transform var(--ease),background var(--ease),box-shadow var(--ease)
     }
-    .calc-icon { width: 36px; height: 36px; flex-shrink: 0; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
-    .calc-icon svg { width: 18px; height: 18px; stroke-width: 1.8; fill: none; }
-    .calc-title { font-size: 0.92rem; font-weight: 600; flex: 1; }
-    .calc-sub { font-size: 0.76rem; color: var(--subtle); margin-top: 0.05rem; }
-    .chevron { width: 16px; height: 16px; stroke: var(--subtle); fill: none; stroke-width: 2; transition: transform 0.25s ease; }
-    .calc-card.open .chevron { transform: rotate(180deg); }
-    .calc-body { padding: 1.4rem; display: none; }
-    .calc-card.open .calc-body { display: block; animation: fadeUp 0.2s ease forwards; }
+    .nav-cta:hover,.btn-primary:hover{transform:translateY(-2px);background:var(--green-800);box-shadow:0 12px 26px rgba(18,59,42,.23)}
+    .menu-btn{display:none;border:1px solid var(--line);background:white;border-radius:12px;padding:8px 10px}
 
-    /* ── FORM ────────────────────────────────────────────────────── */
-    .wl-select-row { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.4rem; flex-wrap: wrap; }
-    .wl-select-row label { font-size: 0.78rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
-    .wl-select-row select, .wl-select-row .region-toggle { padding: 0.5rem 0.9rem; border: 1px solid var(--border); border-radius: 7px; font-family: inherit; font-size: 0.88rem; color: var(--text); background: var(--surface2); outline: none; cursor: pointer; transition: border-color var(--t), box-shadow var(--t); }
-    .wl-select-row select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(28,78,216,0.1); }
-
-    .param-block { margin-bottom: 1.5rem; }
-    .param-label {
-      font-size: 0.8rem; font-weight: 700; color: var(--text);
-      background: var(--surface2); border: 1px solid var(--border);
-      border-radius: 7px; padding: 0.55rem 0.9rem; margin-bottom: 0.85rem;
-      display: flex; align-items: center; justify-content: space-between;
+    /* Hero */
+    .hero{padding:76px 0 54px;position:relative}
+    .hero-grid{display:grid;grid-template-columns:1.02fr .98fr;gap:58px;align-items:center}
+    .eyebrow{
+      display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:999px;
+      background:var(--green-100);color:var(--green-800);font:700 11px Manrope;letter-spacing:.08em;text-transform:uppercase
     }
-    .param-wt { font-size: 0.72rem; font-weight: 600; color: var(--accent); background: #EFF6FF; border-radius: 100px; padding: 0.15rem 0.6rem; border: 1px solid #BFDBFE; }
-
-    .field-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.9rem; }
-    .field { display: flex; flex-direction: column; gap: 0.3rem; }
-    .field label { font-size: 0.73rem; font-weight: 600; color: var(--muted); letter-spacing: 0.04em; text-transform: uppercase; }
-    .field input, .field select {
-      background: var(--surface2); border: 1px solid var(--border); border-radius: 7px;
-      padding: 0.6rem 0.8rem; font-family: inherit; font-size: 0.9rem; color: var(--text);
-      outline: none; transition: border-color var(--t), box-shadow var(--t);
-      -moz-appearance: textfield;
+    .dot{width:7px;height:7px;border-radius:50%;background:var(--green-600);box-shadow:0 0 0 5px rgba(50,148,95,.12)}
+    h1,h2,h3{font-family:Manrope;line-height:1.08;margin:0}
+    h1{font-size:clamp(42px,6vw,76px);letter-spacing:-.055em;margin:22px 0 20px}
+    .hero-copy{font-size:18px;color:var(--muted);max-width:620px}
+    .hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin:30px 0}
+    .btn-secondary{
+      padding:11px 18px;border:1px solid var(--line);border-radius:999px;background:white;color:var(--ink);font-weight:700;
+      transition:all var(--ease)
     }
-    .field input::-webkit-outer-spin-button, .field input::-webkit-inner-spin-button { -webkit-appearance: none; }
-    .field input:focus, .field select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(28,78,216,0.1); background: #fff; }
-    .field input::placeholder { color: var(--subtle); }
+    .btn-secondary:hover{border-color:#b9c9bd;transform:translateY(-2px);box-shadow:var(--shadow-sm)}
+    .trust-row{display:flex;gap:24px;flex-wrap:wrap;color:var(--muted);font-size:12px;font-weight:600}
+    .trust-row span{display:flex;gap:7px;align-items:center}
+    .check{width:18px;height:18px;border-radius:50%;display:grid;place-items:center;background:var(--green-100);color:var(--green-700);font-size:11px}
 
-    .calc-btn {
-      margin-top: 1rem; padding: 0.65rem 1.8rem; background: var(--accent);
-      color: #fff; font-family: inherit; font-size: 0.88rem; font-weight: 600;
-      border: none; border-radius: 7px; cursor: pointer;
-      transition: background var(--t), transform var(--t), box-shadow var(--t);
+    .hero-visual{
+      min-height:510px;border-radius:32px;position:relative;overflow:hidden;
+      background:
+        radial-gradient(circle at 70% 25%,rgba(216,239,133,.85),transparent 22%),
+        linear-gradient(145deg,#1b563b 0%,#0d2e1f 75%);
+      box-shadow:var(--shadow)
     }
-    .calc-btn:hover { background: #1741B5; box-shadow: 0 4px 12px rgba(28,78,216,0.3); transform: translateY(-1px); }
-    .calc-btn:active { transform: translateY(0); }
-
-    /* ── RESULTS ─────────────────────────────────────────────────── */
-    .result-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 0.8rem; margin-top: 1.2rem; }
-    .result-card {
-      background: var(--surface2); border: 1px solid var(--border); border-radius: 9px;
-      padding: 0.95rem 1rem; opacity: 0; transform: translateY(8px);
+    .leaf{
+      position:absolute;border-radius:100% 0 100% 0;background:linear-gradient(135deg,#a8df68,#2d8a53);
+      transform:rotate(-24deg);filter:drop-shadow(0 14px 16px rgba(0,0,0,.16))
     }
-    .result-card.show { animation: popIn 0.3s ease forwards; }
-    .result-label { font-size: 0.7rem; font-weight: 600; color: var(--subtle); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.3rem; }
-    .result-value { font-size: 1.45rem; font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; }
-    .result-unit  { font-size: 0.72rem; color: var(--subtle); margin-top: 0.15rem; }
-    .result-card.positive .result-value { color: var(--success); }
-    .result-card.negative .result-value { color: var(--danger); }
-    .result-card.neutral  .result-value { color: var(--accent); }
-    .result-card.warning  .result-value { color: var(--warning); }
-    .result-card.payout   { background: #EFF6FF; border-color: #BFDBFE; }
-    .result-card.payout .result-value { color: var(--hts); font-size: 1.7rem; }
-
-    /* ── SLAB TABLE ──────────────────────────────────────────────── */
-    .slab-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin-top: 0.75rem; }
-    .slab-table th { background: var(--surface2); padding: 0.5rem 0.75rem; text-align: left; font-weight: 600; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); border-bottom: 1px solid var(--border); }
-    .slab-table td { padding: 0.45rem 0.75rem; border-bottom: 1px solid var(--border); color: var(--text); }
-    .slab-table tr.hit td { background: #DCFCE7; font-weight: 600; }
-    .slab-table tr.hit td:first-child::before { content: '✓ '; color: var(--success); }
-
-    .section-divider { font-size: 0.7rem; font-weight: 700; color: var(--subtle); text-transform: uppercase; letter-spacing: 0.1em; margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
-
-    .tip { font-size: 0.78rem; color: var(--muted); background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 7px; padding: 0.6rem 0.85rem; margin-top: 0.85rem; display: flex; gap: 0.5rem; align-items: flex-start; }
-    .tip svg { flex-shrink: 0; margin-top: 1px; width: 13px; height: 13px; stroke: var(--accent); fill: none; stroke-width: 2; }
-
-    /* ── DOWNLOAD BAR ────────────────────────────────────────────── */
-    .download-bar {
-      display: none; align-items: center; gap: 0.6rem; flex-wrap: wrap;
-      margin-top: 1.1rem; padding-top: 1rem; border-top: 1px solid var(--border);
+    .leaf.l1{width:230px;height:105px;right:70px;top:75px}
+    .leaf.l2{width:185px;height:85px;right:215px;top:178px;transform:rotate(24deg)}
+    .leaf.l3{width:260px;height:115px;right:50px;top:275px;transform:rotate(-35deg)}
+    .tray{
+      position:absolute;left:9%;right:9%;bottom:45px;height:190px;border-radius:28px 28px 18px 18px;
+      background:linear-gradient(#6b4630,#432b20);border:9px solid #2e211a;box-shadow:0 25px 45px rgba(0,0,0,.32)
     }
-    .download-bar.show { display: flex; animation: fadeUp 0.25s ease forwards; }
-    .download-label { font-size: 0.75rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-right: 0.2rem; }
-    .dl-btn {
-      display: inline-flex; align-items: center; gap: 0.4rem;
-      padding: 0.45rem 1rem; border-radius: 7px; border: 1px solid var(--border);
-      font-family: inherit; font-size: 0.8rem; font-weight: 600; cursor: pointer;
-      transition: all var(--t); background: var(--surface);
+    .micro-row{position:absolute;left:8%;right:8%;top:-34px;height:85px;display:flex;align-items:flex-end;gap:8px}
+    .stem{width:7px;height:65px;border-radius:8px;background:#79bf61;position:relative}
+    .stem:before,.stem:after{content:"";position:absolute;width:30px;height:17px;background:#73bd5e;border-radius:100% 0 100% 0;top:8px}
+    .stem:before{right:1px;transform:rotate(-20deg)}
+    .stem:after{left:0;top:25px;transform:rotate(205deg)}
+    .visual-badge{
+      position:absolute;top:24px;left:24px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);
+      color:white;border-radius:14px;padding:11px 14px;font-size:12px;backdrop-filter:blur(8px)
     }
-    .dl-btn svg { width: 14px; height: 14px; fill: none; stroke-width: 2; }
-    .dl-btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
-    .dl-btn.excel  { color: #166534; border-color: #BBF7D0; }
-    .dl-btn.excel:hover  { background: #F0FDF4; }
-    .dl-btn.pdf    { color: #991B1B; border-color: #FECACA; }
-    .dl-btn.pdf:hover    { background: #FEF2F2; }
-    .dl-btn.jpg    { color: #92400E; border-color: #FDE68A; }
-    .dl-btn.jpg:hover    { background: #FFFBEB; }
-    .dl-btn.png    { color: #5B21B6; border-color: #DDD6FE; }
-    .dl-btn.png:hover    { background: #F5F3FF; }
+    .visual-badge strong{display:block;font:800 16px Manrope;margin-bottom:2px}
 
-    /* ── ANIMATIONS ──────────────────────────────────────────────── */
-    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes popIn  { 0% { opacity: 0; transform: translateY(8px) scale(0.97); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
-    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
+    /* Sections */
+    section{padding:86px 0}
+    .section-head{display:flex;align-items:end;justify-content:space-between;gap:30px;margin-bottom:32px}
+    .section-head h2{font-size:clamp(30px,4vw,46px);letter-spacing:-.045em}
+    .section-head p{max-width:510px;color:var(--muted);margin:0}
+    .kicker{font:800 11px Manrope;letter-spacing:.12em;text-transform:uppercase;color:var(--green-700);margin-bottom:10px}
 
-    /* ── RESPONSIVE ──────────────────────────────────────────────── */
-    @media (max-width: 700px) {
-      .category-grid { grid-template-columns: 1fr 1fr; }
-      .field-grid { grid-template-columns: 1fr; }
-      .result-grid { grid-template-columns: 1fr 1fr; }
-      .section-hero { flex-direction: column; }
+    /* Stats */
+    .stats{padding:24px 0}
+    .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);background:#fff;border-radius:22px;overflow:hidden}
+    .stat{padding:24px;border-right:1px solid var(--line)}
+    .stat:last-child{border-right:0}
+    .stat strong{display:block;font:800 29px Manrope;letter-spacing:-.04em}
+    .stat span{color:var(--muted);font-size:12px}
+
+    /* Product cards */
+    .product-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+    .product{
+      background:#fff;border:1px solid var(--line);border-radius:22px;overflow:hidden;
+      transition:transform var(--ease),box-shadow var(--ease),border-color var(--ease)
     }
-    @media (max-width: 400px) {
-      .category-grid { grid-template-columns: 1fr 1fr; gap: 0.9rem; }
-      .cat-card { padding: 1.8rem 0.7rem; }
+    .product:hover{transform:translateY(-6px);box-shadow:var(--shadow);border-color:#c8d7ca}
+    .product-art{height:185px;position:relative;overflow:hidden;background:linear-gradient(135deg,#dcefcf,#f8f4dc)}
+    .product-art span{position:absolute;border-radius:50% 10% 50% 10%;background:#4b9b59}
+    .product-art .p1{width:120px;height:120px;left:45px;top:45px;transform:rotate(25deg)}
+    .product-art .p2{width:85px;height:85px;right:35px;top:30px;transform:rotate(-28deg);background:#6dbb61}
+    .product-art .p3{width:95px;height:95px;right:85px;bottom:-30px;transform:rotate(10deg);background:#31874f}
+    .product-body{padding:20px}
+    .tag{display:inline-block;font:800 10px Manrope;text-transform:uppercase;letter-spacing:.1em;color:var(--green-700);background:var(--green-100);padding:5px 8px;border-radius:999px}
+    .product h3{font-size:20px;margin:11px 0 5px}
+    .product p{margin:0;color:var(--muted);font-size:13px}
+    .product-foot{display:flex;justify-content:space-between;align-items:center;margin-top:17px}
+    .price{font:800 17px Manrope}
+    .add-btn{border:0;background:#edf4ee;color:var(--green-800);font-weight:800;border-radius:10px;padding:8px 11px}
+
+    /* Benefits */
+    .split{display:grid;grid-template-columns:.9fr 1.1fr;gap:60px;align-items:center}
+    .dark-panel{background:var(--green-900);color:white;border-radius:30px;padding:42px;position:relative;overflow:hidden}
+    .dark-panel:after{content:"";position:absolute;width:230px;height:230px;border-radius:50%;right:-100px;bottom:-100px;background:rgba(216,239,133,.12)}
+    .dark-panel h2{font-size:42px;letter-spacing:-.05em}
+    .dark-panel p{color:#bdd0c4;max-width:450px}
+    .mini-list{display:grid;gap:12px;margin-top:26px}
+    .mini-list div{display:flex;gap:11px;align-items:center;color:#e8f2eb;font-weight:600;font-size:13px}
+    .benefits{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .benefit{background:#fff;border:1px solid var(--line);border-radius:20px;padding:22px}
+    .benefit-icon{width:38px;height:38px;border-radius:12px;background:var(--green-100);display:grid;place-items:center;color:var(--green-700);font-weight:900;margin-bottom:14px}
+    .benefit h3{font-size:18px;margin-bottom:5px}
+    .benefit p{margin:0;color:var(--muted);font-size:13px}
+
+    /* Calculator */
+    .calculator-section{background:#edf2ea}
+    .calc-shell{display:grid;grid-template-columns:.8fr 1.2fr;gap:20px}
+    .calc-intro,.calc-card{background:#fff;border:1px solid var(--line);border-radius:26px;padding:30px}
+    .calc-intro h2{font-size:42px;letter-spacing:-.05em}
+    .calc-intro p{color:var(--muted)}
+    .formula{
+      margin-top:22px;padding:15px;border-radius:15px;background:#f4f7f1;border:1px dashed #cbd8cd;
+      font-size:12px;color:#506057
+    }
+    .calc-form{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .field{display:grid;gap:6px}
+    .field.full{grid-column:1/-1}
+    .field label{font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#516057}
+    .field input,.field select{
+      width:100%;padding:12px 13px;border:1px solid var(--line);border-radius:12px;background:#fbfcf9;outline:none;color:var(--ink)
+    }
+    .field input:focus,.field select:focus{border-color:#8bb497;box-shadow:0 0 0 4px rgba(50,148,95,.10)}
+    .calc-actions{display:flex;gap:10px;margin-top:18px}
+    .btn-calc{border:0;background:var(--green-900);color:#fff;border-radius:12px;padding:13px 18px;font-weight:800}
+    .btn-reset{border:1px solid var(--line);background:#fff;border-radius:12px;padding:13px 18px;font-weight:700}
+    .results{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin-top:22px}
+    .result{padding:17px;border-radius:15px;background:#f5f8f3;border:1px solid #e1e9e1}
+    .result.highlight{background:var(--green-900);color:white;border-color:var(--green-900)}
+    .result small{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.08em;font-weight:800;opacity:.72}
+    .result strong{display:block;font:800 24px Manrope;margin-top:4px}
+    .result em{font-style:normal;font-size:11px;opacity:.7}
+
+    /* Growing process */
+    .process{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+    .step{background:#fff;border:1px solid var(--line);border-radius:20px;padding:21px;position:relative}
+    .step-no{font:800 11px Manrope;color:var(--green-700);letter-spacing:.1em}
+    .step h3{font-size:17px;margin:14px 0 6px}
+    .step p{font-size:12px;color:var(--muted);margin:0}
+
+    /* CTA */
+    .cta{padding-top:40px}
+    .cta-box{
+      border-radius:30px;background:linear-gradient(135deg,#143d2b,#236d49);padding:46px;color:white;
+      display:flex;justify-content:space-between;align-items:center;gap:25px;overflow:hidden
+    }
+    .cta-box h2{font-size:42px;letter-spacing:-.05em}
+    .cta-box p{color:#c8d9ce;margin-bottom:0}
+    .btn-light{background:#fff;color:var(--green-900);border:0;border-radius:999px;padding:13px 20px;font-weight:800;white-space:nowrap}
+
+    /* FAQ */
+    .faq{max-width:850px;margin:auto}
+    details{background:#fff;border:1px solid var(--line);border-radius:15px;margin-bottom:10px;padding:17px 19px}
+    summary{font-weight:800;cursor:pointer}
+    details p{color:var(--muted);font-size:13px;margin:12px 0 0}
+
+    footer{padding:45px 0 55px;border-top:1px solid var(--line);color:var(--muted);font-size:12px}
+    .footer-grid{display:flex;justify-content:space-between;gap:20px;align-items:center}
+    .footer-brand{font:800 16px Manrope;color:var(--ink)}
+
+    .toast{
+      position:fixed;right:20px;bottom:20px;z-index:2000;max-width:330px;
+      background:var(--green-950);color:#fff;padding:13px 16px;border-radius:13px;
+      box-shadow:var(--shadow);transform:translateY(25px);opacity:0;pointer-events:none;transition:all var(--ease);font-size:13px
+    }
+    .toast.show{transform:translateY(0);opacity:1}
+
+    @media(max-width:950px){
+      .hero-grid,.split,.calc-shell{grid-template-columns:1fr}
+      .hero-visual{min-height:430px}
+      .product-grid{grid-template-columns:repeat(2,1fr)}
+      .process{grid-template-columns:repeat(2,1fr)}
+      .stats-grid{grid-template-columns:repeat(2,1fr)}
+      .stat:nth-child(2){border-right:0}
+      .stat:nth-child(-n+2){border-bottom:1px solid var(--line)}
+      .nav-links{display:none}
+      .menu-btn{display:block}
+      .nav-links.open{display:flex;position:absolute;top:76px;left:20px;right:20px;background:white;border:1px solid var(--line);border-radius:16px;padding:18px;flex-direction:column;align-items:flex-start;box-shadow:var(--shadow)}
+    }
+    @media(max-width:620px){
+      .container{width:min(100% - 28px,1180px)}
+      section{padding:62px 0}
+      .hero{padding-top:45px}
+      .hero-visual{min-height:350px}
+      .product-grid,.benefits,.process,.stats-grid{grid-template-columns:1fr}
+      .stat{border-right:0;border-bottom:1px solid var(--line)}
+      .stat:last-child{border-bottom:0}
+      .calc-form,.results{grid-template-columns:1fr}
+      .field.full{grid-column:auto}
+      .cta-box{padding:32px;display:block}
+      .cta-box .btn-light{margin-top:20px}
+      .section-head{display:block}
+      .section-head p{margin-top:12px}
     }
   </style>
 </head>
+
 <body>
+  <div class="nav-wrap">
+    <nav class="container">
+      <a class="brand" href="#top" aria-label="GreenSprout home">
+        <span class="brand-mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">
+            <path d="M12 21V9"/><path d="M12 13C7 13 4 10 4 5c5 0 8 3 8 8Z"/><path d="M12 17c5 0 8-3 8-8-5 0-8 3-8 8Z"/>
+          </svg>
+        </span>
+        <span>GreenSprout<small>Microgreens</small></span>
+      </a>
 
-<header>
-  <div class="header-inner">
-    <div class="logo">
-      <div class="logo-icon">
-        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      <div class="nav-links" id="navLinks">
+        <a href="#varieties">Varieties</a>
+        <a href="#benefits">Why microgreens</a>
+        <a href="#calculator">Calculator</a>
+        <a href="#process">Our process</a>
+        <a href="#faq">FAQ</a>
       </div>
-      HTS 2026 Parameters
-    </div>
-    <button class="back-btn" id="backBtn" onclick="showLanding()">
-      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-      Back
-    </button>
-  </div>
-</header>
 
-<main>
-
-  <!-- ── LANDING ────────────────────────────────────────────────── -->
-  <div id="landing">
-    <div class="landing-title">
-      <h1>Company Parameter Calculator</h1>
-      <p>Select your category to view and calculate 2026 performance parameters.</p>
-    </div>
-    <div class="category-grid">
-      <div class="cat-card disabled" onclick="">
-        <span class="cat-icon">🏪</span>
-        <div class="cat-name">GT</div>
-        <div class="cat-desc">General Trade</div>
-        <span class="cat-badge badge-soon">Coming Soon</span>
-      </div>
-      <div class="cat-card disabled" onclick="">
-        <span class="cat-icon">🏬</span>
-        <div class="cat-name">MT</div>
-        <div class="cat-desc">Modern Trade</div>
-        <span class="cat-badge badge-soon">Coming Soon</span>
-      </div>
-      <div class="cat-card" onclick="showHTS()">
-        <span class="cat-icon">📊</span>
-        <div class="cat-name">HTS</div>
-        <div class="cat-desc">Home & Tea Solutions</div>
-        <span class="cat-badge badge-active">2026 Live</span>
-      </div>
-      <div class="cat-card disabled" onclick="">
-        <span class="cat-icon">🚀</span>
-        <div class="cat-name">RS</div>
-        <div class="cat-desc">Rural Sales</div>
-        <span class="cat-badge badge-soon">Coming Soon</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── HTS SECTION ────────────────────────────────────────────── -->
-  <div id="hts-section">
-    <div class="section-hero">
-      <div>
-        <h2>HTS — 2026 Parameter Calculators</h2>
-        <p>Monthly PRP, Quarterly QPB, WPG, RSSM Incentive &amp; RS CDT</p>
-      </div>
-      <div class="hero-pills">
-        <span class="hero-pill">PRP Monthly</span>
-        <span class="hero-pill">QPB Quarterly</span>
-        <span class="hero-pill">WPG</span>
-        <span class="hero-pill">RSSM</span>
-        <span class="hero-pill">RS CDT</span>
-      </div>
-    </div>
-
-    <nav class="tab-nav" role="tablist">
-      <button class="tab-btn active" role="tab" data-tab="prp">PRP Payout</button>
-      <button class="tab-btn" role="tab" data-tab="qpb">QPB</button>
-      <button class="tab-btn" role="tab" data-tab="wpg">WPG</button>
-      <button class="tab-btn" role="tab" data-tab="rssm">RSSM Incentive</button>
-      <button class="tab-btn" role="tab" data-tab="cdt">RS CDT</button>
+      <a class="nav-cta" href="#order">Order fresh</a>
+      <button class="menu-btn" id="menuBtn" aria-label="Open menu">☰</button>
     </nav>
+  </div>
 
-    <!-- ── PRP PAYOUT ──────────────────────────────────────────── -->
-    <div class="panel active" id="panel-prp">
-      <div class="calc-card open" id="card-prp">
-        <div class="calc-header" onclick="toggleCard('card-prp')">
-          <div class="calc-icon" style="background:#EFF6FF;"><svg viewBox="0 0 24 24" style="stroke:#1C4ED8"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
-          <div><div class="calc-title">PRP Payout — Monthly (1ABC Explode)</div><div class="calc-sub">3 Parameters · WL1A / WL1B / WL1C / TTSO</div></div>
-          <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-        </div>
-        <div class="calc-body">
-          <div class="wl-select-row">
-            <label for="prp-wl">Work Level</label>
-            <select id="prp-wl">
-              <option value="14500">WL1A — Max ₹14,500</option>
-              <option value="18000">WL1B — Max ₹18,000</option>
-              <option value="20500">WL1C — Max ₹20,500</option>
-              <option value="6000">TTSO — Max ₹6,000</option>
-            </select>
+  <main id="top">
+    <section class="hero">
+      <div class="container hero-grid">
+        <div>
+          <span class="eyebrow"><span class="dot"></span> Harvested fresh in small batches</span>
+          <h1>Small greens.<br><span style="color:var(--green-700)">Big nutrition.</span></h1>
+          <p class="hero-copy">
+            Premium microgreens grown cleanly, harvested at peak freshness and packed for homes,
+            cafés, restaurants and health-focused customers.
+          </p>
+          <div class="hero-actions">
+            <a class="btn-primary" href="#varieties">Explore varieties →</a>
+            <a class="btn-secondary" href="#calculator">Plan production</a>
           </div>
-
-          <!-- P1 -->
-          <div class="param-block">
-            <div class="param-label">
-              Parameter 1 — MGP (HTS + IBS)
-              <span class="param-wt">Weightage 40%</span>
-            </div>
-            <div class="field-grid">
-              <div class="field"><label>Target</label><input type="number" id="p1-tgt" placeholder="e.g. 500000" /></div>
-              <div class="field"><label>Achievement</label><input type="number" id="p1-ach" placeholder="e.g. 520000" /></div>
-            </div>
-          </div>
-
-          <!-- P2 -->
-          <div class="param-block">
-            <div class="param-label">
-              Parameter 2 — My HTS (No. of Growing OIs)
-              <span class="param-wt">Weightage 20%</span>
-            </div>
-            <div class="field-grid">
-              <div class="field"><label>Target (OIs)</label><input type="number" id="p2-tgt" placeholder="e.g. 100" /></div>
-              <div class="field"><label>Achievement (OIs)</label><input type="number" id="p2-ach" placeholder="e.g. 92" /></div>
-            </div>
-          </div>
-
-          <!-- P3a -->
-          <div class="param-block">
-            <div class="param-label">
-              Parameter 3a — Coverage
-              <span class="param-wt">Weightage 20%</span>
-            </div>
-            <div class="field-grid">
-              <div class="field"><label>Target Outlets</label><input type="number" id="p3a-tgt" placeholder="e.g. 200" /></div>
-              <div class="field"><label>Covered Outlets</label><input type="number" id="p3a-ach" placeholder="e.g. 190" /></div>
-            </div>
-          </div>
-
-          <!-- P3b -->
-          <div class="param-block">
-            <div class="param-label">
-              Parameter 3b — South: RTD+Biscuits Value &nbsp;/&nbsp; Non-South: EFOS (min 20 bills)
-              <span class="param-wt">Weightage 20%</span>
-            </div>
-            <div class="field-grid">
-              <div class="field"><label>Target</label><input type="number" id="p3b-tgt" placeholder="e.g. 300000" /></div>
-              <div class="field"><label>Achievement</label><input type="number" id="p3b-ach" placeholder="e.g. 280000" /></div>
-            </div>
-          </div>
-
-          <button class="calc-btn" onclick="calcPRP()">Calculate PRP Payout</button>
-          <div class="result-grid" id="res-prp"></div>
-          <div class="download-bar" id="dl-prp">
-            <span class="download-label">Download</span>
-            <button class="dl-btn excel" onclick="dlExcel('res-prp','PRP_Payout')"><svg viewBox="0 0 24 24" stroke="#166534"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg> Excel</button>
-            <button class="dl-btn pdf"   onclick="dlPDF('res-prp','PRP_Payout')"><svg viewBox="0 0 24 24" stroke="#991B1B"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> PDF</button>
-            <button class="dl-btn jpg"   onclick="dlJPG('res-prp','PRP_Payout')"><svg viewBox="0 0 24 24" stroke="#92400E"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> JPG</button>
-            <button class="dl-btn png"   onclick="dlPNG('res-prp','PRP_Payout')"><svg viewBox="0 0 24 24" stroke="#5B21B6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> PNG</button>
-          </div>
-
-          <div class="tip">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            Slabs — P1 &amp; P3b: ≥103%=5pts, ≥100%=4pts, ≥97%=3pts | P2: ≥95%=5pts, ≥85%=4pts, ≥75%=3pts | P3a: 100%=5pts, ≥90%=4pts, ≥80%=3pts
+          <div class="trust-row">
+            <span><i class="check">✓</i> Freshly harvested</span>
+            <span><i class="check">✓</i> Small-batch grown</span>
+            <span><i class="check">✓</i> Local delivery</span>
           </div>
         </div>
+
+        <div class="hero-visual" aria-label="Illustration of a microgreen growing tray">
+          <div class="visual-badge"><strong>7–14 day crops</strong>Fast-cycle fresh greens</div>
+          <div class="leaf l1"></div><div class="leaf l2"></div><div class="leaf l3"></div>
+          <div class="tray">
+            <div class="micro-row">
+              <i class="stem"></i><i class="stem"></i><i class="stem"></i><i class="stem"></i><i class="stem"></i>
+              <i class="stem"></i><i class="stem"></i><i class="stem"></i><i class="stem"></i><i class="stem"></i>
+              <i class="stem"></i><i class="stem"></i><i class="stem"></i><i class="stem"></i><i class="stem"></i>
+              <i class="stem"></i><i class="stem"></i><i class="stem"></i><i class="stem"></i><i class="stem"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="stats">
+      <div class="container stats-grid">
+        <div class="stat"><strong>50g</strong><span>Standard retail pack size</span></div>
+        <div class="stat"><strong>7 days</strong><span>Example harvest cycle</span></div>
+        <div class="stat"><strong>30/day</strong><span>Production planning target</span></div>
+        <div class="stat"><strong>100%</strong><span>Freshness-first workflow</span></div>
       </div>
     </div>
 
-    <!-- ── QPB ────────────────────────────────────────────────── -->
-    <div class="panel" id="panel-qpb">
-      <div class="calc-card open" id="card-qpb">
-        <div class="calc-header" onclick="toggleCard('card-qpb')">
-          <div class="calc-icon" style="background:#F0FDF4;"><svg viewBox="0 0 24 24" style="stroke:#15803D"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div>
-          <div><div class="calc-title">QPB — Quarterly Performance Bonus</div><div class="calc-sub">Tea+Coffee+Nuts Value · Volume · Perfect Store</div></div>
-          <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    <section id="varieties">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <div class="kicker">Our greens</div>
+            <h2>Choose your daily green.</h2>
+          </div>
+          <p>Build your menu around vibrant colour, fresh texture and easy-to-use microgreens.</p>
         </div>
-        <div class="calc-body">
-          <div class="wl-select-row">
-            <label for="qpb-wl">Work Level</label>
-            <select id="qpb-wl">
-              <option value="21000">WL1A — Max ₹21,000</option>
-              <option value="27375">WL1B — Max ₹27,375</option>
-              <option value="31000">WL1C — Max ₹31,000</option>
-            </select>
-          </div>
 
-          <div class="param-block">
-            <div class="param-label">Category Value (Tea + Coffee + Nuts) — Full Business<span class="param-wt">Weightage 40%</span></div>
-            <div class="field-grid">
-              <div class="field"><label>Quarterly Target (₹)</label><input type="number" id="q1-tgt" placeholder="e.g. 1500000" /></div>
-              <div class="field"><label>Achievement (₹)</label><input type="number" id="q1-ach" placeholder="e.g. 1545000" /></div>
+        <div class="product-grid">
+          <article class="product">
+            <div class="product-art"><span class="p1"></span><span class="p2"></span><span class="p3"></span></div>
+            <div class="product-body">
+              <span class="tag">Popular</span><h3>Radish</h3><p>Peppery, crisp and colourful. Great for salads, sandwiches and bowls.</p>
+              <div class="product-foot"><span class="price">₹60 / 50g</span><button class="add-btn" data-product="Radish">Add</button></div>
+            </div>
+          </article>
+
+          <article class="product">
+            <div class="product-art" style="background:linear-gradient(135deg,#f1e6d5,#e3f2d6)"><span class="p1" style="background:#6aa35a"></span><span class="p2" style="background:#89bd63"></span><span class="p3" style="background:#3e7e4a"></span></div>
+            <div class="product-body">
+              <span class="tag">Mild</span><h3>Broccoli</h3><p>Delicate flavour and a versatile green for everyday meals.</p>
+              <div class="product-foot"><span class="price">₹60 / 50g</span><button class="add-btn" data-product="Broccoli">Add</button></div>
+            </div>
+          </article>
+
+          <article class="product">
+            <div class="product-art" style="background:linear-gradient(135deg,#f2d8df,#e7ebd4)"><span class="p1" style="background:#b64e66"></span><span class="p2" style="background:#d17a87"></span><span class="p3" style="background:#7f3c53"></span></div>
+            <div class="product-body">
+              <span class="tag">Chef pick</span><h3>Beetroot</h3><p>Bold colour with an earthy profile that elevates plating instantly.</p>
+              <div class="product-foot"><span class="price">₹70 / 50g</span><button class="add-btn" data-product="Beetroot">Add</button></div>
+            </div>
+          </article>
+
+          <article class="product">
+            <div class="product-art" style="background:linear-gradient(135deg,#e6efcf,#d8e9d2)"><span class="p1" style="background:#79a94f"></span><span class="p2" style="background:#a3c968"></span><span class="p3" style="background:#477b43"></span></div>
+            <div class="product-body">
+              <span class="tag">Fresh</span><h3>Pea Shoots</h3><p>Sweet, juicy and crunchy — excellent for wraps, salads and garnish.</p>
+              <div class="product-foot"><span class="price">₹65 / 50g</span><button class="add-btn" data-product="Pea Shoots">Add</button></div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="benefits">
+      <div class="container split">
+        <div class="dark-panel">
+          <div class="kicker" style="color:var(--lime)">Why microgreens</div>
+          <h2>Make every plate look alive.</h2>
+          <p>Microgreens are harvested young, making them a practical way to add colour, texture and fresh plant flavour to everyday food.</p>
+          <div class="mini-list">
+            <div><span class="check">✓</span> Harvest-to-pack workflow</div>
+            <div><span class="check">✓</span> Consistent batch planning</div>
+            <div><span class="check">✓</span> Ideal for homes & food businesses</div>
+          </div>
+        </div>
+
+        <div class="benefits">
+          <article class="benefit"><div class="benefit-icon">✦</div><h3>Freshness</h3><p>Short production cycles make it possible to plan frequent harvests instead of long storage.</p></article>
+          <article class="benefit"><div class="benefit-icon">⌁</div><h3>Colour</h3><p>Bright greens and deep reds can turn simple dishes into premium-looking plates.</p></article>
+          <article class="benefit"><div class="benefit-icon">＋</div><h3>Easy to use</h3><p>Top salads, dosa, sandwiches, soups, bowls or restaurant dishes just before serving.</p></article>
+          <article class="benefit"><div class="benefit-icon">↗</div><h3>Fast cycles</h3><p>Many microgreen varieties can be produced in compact growing spaces with disciplined scheduling.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="calculator" class="calculator-section">
+      <div class="container">
+        <div class="section-head">
+          <div><div class="kicker">Production planning</div><h2>Microgreens business calculator.</h2></div>
+          <p>Estimate trays, harvest weight, retail boxes and gross margin before scaling production.</p>
+        </div>
+
+        <div class="calc-shell">
+          <div class="calc-intro">
+            <h2>Turn trays into numbers.</h2>
+            <p>Use your actual crop yield, pack size, price and operating cost. The calculator updates instantly and helps you test different production targets.</p>
+            <div class="formula">
+              <strong>Core model</strong><br>
+              Required trays = daily boxes × pack weight ÷ yield per tray × cycle days
+              <br><br>
+              Gross contribution = sales revenue − direct cost
             </div>
           </div>
 
-          <div class="param-block">
-            <div class="param-label">Volume — South: Tea / Non-South: Coffee<span class="param-wt">Weightage 40%</span></div>
-            <div class="field-grid">
-              <div class="field"><label>Volume Target</label><input type="number" id="q2-tgt" placeholder="e.g. 8000" /></div>
-              <div class="field"><label>Volume Achievement</label><input type="number" id="q2-ach" placeholder="e.g. 8200" /></div>
+          <div class="calc-card">
+            <div class="calc-form">
+              <div class="field">
+                <label>Daily boxes</label>
+                <input id="dailyBoxes" type="number" min="1" value="30">
+              </div>
+              <div class="field">
+                <label>Pack size (g)</label>
+                <input id="packSize" type="number" min="1" value="50">
+              </div>
+              <div class="field">
+                <label>Yield / tray (g)</label>
+                <input id="yieldTray" type="number" min="1" value="250">
+              </div>
+              <div class="field">
+                <label>Crop cycle (days)</label>
+                <input id="cycleDays" type="number" min="1" value="7">
+              </div>
+              <div class="field">
+                <label>Selling price / box (₹)</label>
+                <input id="sellPrice" type="number" min="0" value="60">
+              </div>
+              <div class="field">
+                <label>Direct cost / box (₹)</label>
+                <input id="directCost" type="number" min="0" value="35">
+              </div>
+              <div class="field full">
+                <label>Working days / month</label>
+                <input id="workingDays" type="number" min="1" value="30">
+              </div>
             </div>
-          </div>
 
-          <div class="param-block">
-            <div class="param-label">Perfect Store — Tea, Coffee, Nuts (South ₹300 / NS Tea ₹200+rest ₹300)<span class="param-wt">Weightage 20%</span></div>
-            <div class="field-grid">
-              <div class="field"><label>Target Stores</label><input type="number" id="q3-tgt" placeholder="e.g. 150" /></div>
-              <div class="field"><label>Achieved Stores</label><input type="number" id="q3-ach" placeholder="e.g. 130" /></div>
+            <div class="calc-actions">
+              <button class="btn-calc" id="calculateBtn">Calculate plan</button>
+              <button class="btn-reset" id="resetBtn">Reset</button>
             </div>
-          </div>
 
-          <button class="calc-btn" onclick="calcQPB()">Calculate QPB</button>
-          <div class="result-grid" id="res-qpb"></div>
-          <div class="download-bar" id="dl-qpb">
-            <span class="download-label">Download</span>
-            <button class="dl-btn excel" onclick="dlExcel('res-qpb','QPB_Quarterly')"><svg viewBox="0 0 24 24" stroke="#166534"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Excel</button>
-            <button class="dl-btn pdf"   onclick="dlPDF('res-qpb','QPB_Quarterly')"><svg viewBox="0 0 24 24" stroke="#991B1B"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> PDF</button>
-            <button class="dl-btn jpg"   onclick="dlJPG('res-qpb','QPB_Quarterly')"><svg viewBox="0 0 24 24" stroke="#92400E"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> JPG</button>
-            <button class="dl-btn png"   onclick="dlPNG('res-qpb','QPB_Quarterly')"><svg viewBox="0 0 24 24" stroke="#5B21B6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> PNG</button>
-          </div>
-
-          <div class="tip">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            Value &amp; Volume slabs: ≥103%=5pts, ≥100%=4pts, ≥97%=3pts, ≥95%=2pts. Perfect Store: ≥85%=5pts, ≥75%=4pts, ≥65%=3pts
+            <div class="results" id="results" aria-live="polite"></div>
           </div>
         </div>
       </div>
+    </section>
+
+    <section id="process">
+      <div class="container">
+        <div class="section-head">
+          <div><div class="kicker">Our system</div><h2>From seed to fresh pack.</h2></div>
+          <p>A simple operating workflow designed around hygiene, repeatability, harvest timing and customer experience.</p>
+        </div>
+        <div class="process">
+          <article class="step"><span class="step-no">01 / PREP</span><h3>Seed selection</h3><p>Select a suitable variety and consistent seed lot for the planned batch.</p></article>
+          <article class="step"><span class="step-no">02 / SOW</span><h3>Seed & grow</h3><p>Maintain a controlled watering and light routine throughout the crop cycle.</p></article>
+          <article class="step"><span class="step-no">03 / MONITOR</span><h3>Quality checks</h3><p>Track moisture, airflow, growth uniformity and visible crop issues every day.</p></article>
+          <article class="step"><span class="step-no">04 / HARVEST</span><h3>Cut fresh</h3><p>Harvest according to the crop's planned maturity and customer requirements.</p></article>
+          <article class="step"><span class="step-no">05 / PACK</span><h3>Deliver</h3><p>Pack promptly, label the batch and move fresh product through the delivery workflow.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="order" class="cta">
+      <div class="container">
+        <div class="cta-box">
+          <div>
+            <div class="kicker" style="color:var(--lime)">Freshness delivered</div>
+            <h2>Want a weekly box?</h2>
+            <p>Choose your greens and build a recurring home, café or restaurant supply plan.</p>
+          </div>
+          <button class="btn-light" id="orderBtn">Start an order →</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="faq">
+      <div class="container">
+        <div class="section-head" style="justify-content:center;text-align:center">
+          <div><div class="kicker">Questions</div><h2>Microgreens, simplified.</h2></div>
+        </div>
+        <div class="faq">
+          <details>
+            <summary>What are microgreens?</summary>
+            <p>Microgreens are young edible plants harvested after the seedling stage. Different varieties offer different flavours, colours and textures.</p>
+          </details>
+          <details>
+            <summary>How should I use them?</summary>
+            <p>Add them just before serving to salads, sandwiches, wraps, bowls, breakfast dishes and plated restaurant meals.</p>
+          </details>
+          <details>
+            <summary>Can restaurants buy in bulk?</summary>
+            <p>Yes. A production schedule can be built around recurring weekly demand, crop variety and required pack weights.</p>
+          </details>
+          <details>
+            <summary>Is the calculator a profit guarantee?</summary>
+            <p>No. It is a planning model. Actual yield, wastage, labour, utilities, packaging, delivery, taxes and selling price should be measured from your operation.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-grid">
+      <div><div class="footer-brand">GreenSprout Microgreens</div><div>Fresh greens. Thoughtfully grown.</div></div>
+      <div>© <span id="year"></span> GreenSprout. Built for modern microgreen businesses.</div>
     </div>
+  </footer>
 
-    <!-- ── WPG ────────────────────────────────────────────────── -->
-    <div class="panel" id="panel-wpg">
+  <div class="toast" id="toast"></div>
 
-      <p class="section-divider">FF — WPG Scoring</p>
-      <div class="calc-card open" id="card-wpg-ff">
-        <div class="calc-header" onclick="toggleCard('card-wpg-ff')">
-          <div class="calc-icon" style="background:#F5F3FF;"><svg viewBox="0 0 24 24" style="stroke:#6D28D9"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
-          <div><div class="calc-title">FF WPG Calculator</div><div class="calc-sub">QGP · Tea/Coffee Volume · EFOS · HHT Usage</div></div>
-          <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-        </div>
-        <div class="calc-body">
-          <div class="param-block">
-            <div class="param-label">QGP — Overall Business<span class="param-wt">Weightage 30%</span></div>
-            <div class="field-grid">
-              <div class="field"><label>QGP Target (%)</label><input type="number" id="ff-qgp-tgt" placeholder="100" /></div>
-              <div class="field"><label>QGP Achieved (%)</label><input type="number" id="ff-qgp-ach" placeholder="e.g. 101.5" /></div>
-            </div>
-          </div>
-          <div class="param-block">
-            <div class="param-label">Tea Volume (South) / Coffee (Non-South)<span class="param-wt">Weightage 30%</span></div>
-            <div class="field-grid">
-              <div class="field"><label>Volume Target</label><input type="number" id="ff-vol-tgt" placeholder="e.g. 500" /></div>
-              <div class="field"><label>Volume Achievement</label><input type="number" id="ff-vol-ach" placeholder="e.g. 515" /></div>
-            </div>
-          </div>
-          <div class="param-block">
-            <div class="param-label">EFOS (TN: min 25 bills/day · Rest: min 20 bills/day)<span class="param-wt">Weightage 20%</span></div>
-            <div class="field-grid">
-              <div class="field"><label>EFOS Target (bills)</label><input type="number" id="ff-efos-tgt" placeholder="e.g. 25" /></div>
-              <div class="field"><label>EFOS Achievement</label><input type="number" id="ff-efos-ach" placeholder="e.g. 23" /></div>
-            </div>
-          </div>
-          <div class="param-block">
-            <div class="param-label">HHT Usage — MOC Destination<span class="param-wt">Weightage 20%</span></div>
-            <div class="field-grid">
-              <div class="field"><label>HHT Target (%)</label><input type="number" id="ff-hht-tgt" placeholder="80" /></div>
-              <div class="field"><label>HHT Achievement (%)</label><input type="number" id="ff-hht-ach" placeholder="e.g. 85" /></div>
-            </div>
-          </div>
-          <button class="calc-btn" onclick="calcWPGFF()">Calculate FF WPG Score</button>
-          <div class="result-grid" id="res-wpg-ff"></div>
-          <div class="download-bar" id="dl-wpg-ff">
-            <span class="download-label">Download</span>
-            <button class="dl-btn excel" onclick="dlExcel('res-wpg-ff','WPG_FF')"><svg viewBox="0 0 24 24" stroke="#166534"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Excel</button>
-            <button class="dl-btn pdf"   onclick="dlPDF('res-wpg-ff','WPG_FF')"><svg viewBox="0 0 24 24" stroke="#991B1B"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> PDF</button>
-            <button class="dl-btn jpg"   onclick="dlJPG('res-wpg-ff','WPG_FF')"><svg viewBox="0 0 24 24" stroke="#92400E"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> JPG</button>
-            <button class="dl-btn png"   onclick="dlPNG('res-wpg-ff','WPG_FF')"><svg viewBox="0 0 24 24" stroke="#5B21B6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> PNG</button>
-          </div>
+  <script>
+    "use strict";
 
-          <div class="tip">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            QGP &amp; Volume scoring: ≥97%=3, ≥100%=4, ≥103%=5. EFOS &amp; HHT: ≥80%=3, ≥90%=4, ≥100%=5. Max WPG score = 5.
-          </div>
-        </div>
-      </div>
+    const $ = (id) => document.getElementById(id);
+    const currency = (n) => new Intl.NumberFormat("en-IN", {
+      style: "currency", currency: "INR", maximumFractionDigits: 0
+    }).format(Math.max(0, n));
 
-      <p class="section-divider">ASM — WPG Scoring</p>
-      <div class="calc-card" id="card-wpg-asm">
-        <div class="calc-header" onclick="toggleCard('card-wpg-asm')">
-          <div class="calc-icon" style="background:#EFF6FF;"><svg viewBox="0 0 24 24" style="stroke:#1C4ED8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
-          <div><div class="calc-title">ASM WPG Calculator</div><div class="calc-sub">QGP · Tea Value · Perfect Store · Monthly ECO</div></div>
-          <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-        </div>
-        <div class="calc-body">
-          <div class="param-block">
-            <div class="param-label">QGP — Consistent Delivery (HTS FnR &amp; Nuts)<span class="param-wt">Weightage 40%</span></div>
-            <div class="field-grid">
-              <div class="field"><label>QGP Target (%)</label><input type="number" id="asm-qgp-tgt" placeholder="100" /></div>
-              <div class="field"><label>QGP Achieved (%)</label><input type="number" id="asm-qgp-ach" placeholder="e.g. 102" /></div>
-            </div>
-          </div>
-          <div class="param-block">
-            <div class="param-label">Tea Value — Quarterly Target vs Achievement<span class="param-wt">Weightage 30%</span></div>
-            <div class="field-grid">
-              <div class="field"><label>Tea Value Target (₹)</label><input type="number" id="asm-tv-tgt" placeholder="e.g. 2000000" /></div>
-              <div class="field"><label>Tea Value Achievement (₹)</label><input type="number" id="asm-tv-ach" placeholder="e.g. 1960000" /></div>
-            </div>
-          </div>
-          <div class="param-block">
-            <div class="param-label">Perfect Store — Monthly Achievement<span class="param-wt">Weightage 20%</span></div>
-            <div class="field-grid">
-              <div class="field"><label>PS Target (₹/store)</label><input type="number" id="asm-ps-tgt" placeholder="300" /></div>
-              <div class="field"><label>PS Achieved (%)</label><input type="number" id="asm-ps-ach" placeholder="e.g. 78" /></div>
-            </div>
-          </div>
-          <div class="param-block">
-            <div class="param-label">Monthly ECO (Coverage)<span class="param-wt">Weightage 10%</span></div>
-            <div class="field-grid">
-              <div class="field"><label>ECO Target (%)</label><input type="number" id="asm-eco-tgt" placeholder="100" /></div>
-              <div class="field"><label>ECO Achieved (%)</label><input type="number" id="asm-eco-ach" placeholder="e.g. 98" /></div>
-            </div>
-          </div>
-          <button class="calc-btn" onclick="calcWPGASM()">Calculate ASM WPG Score</button>
-          <div class="result-grid" id="res-wpg-asm"></div>
-          <div class="download-bar" id="dl-wpg-asm">
-            <span class="download-label">Download</span>
-            <button class="dl-btn excel" onclick="dlExcel('res-wpg-asm','WPG_ASM')"><svg viewBox="0 0 24 24" stroke="#166534"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Excel</button>
-            <button class="dl-btn pdf"   onclick="dlPDF('res-wpg-asm','WPG_ASM')"><svg viewBox="0 0 24 24" stroke="#991B1B"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> PDF</button>
-            <button class="dl-btn jpg"   onclick="dlJPG('res-wpg-asm','WPG_ASM')"><svg viewBox="0 0 24 24" stroke="#92400E"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> JPG</button>
-            <button class="dl-btn png"   onclick="dlPNG('res-wpg-asm','WPG_ASM')"><svg viewBox="0 0 24 24" stroke="#5B21B6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> PNG</button>
-          </div>
-
-          <div class="tip">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            QGP: ≥97%=3, ≥100%=4, ≥103%=5. Tea Value: ≥95%=2, ≥97%=3, ≥99.6%=4, ≥103%=5. PS: ≥65%=3, ≥75%=4, ≥85%=5. ECO: ≥90%=3, ≥95%=4, ≥100%=5
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── RSSM INCENTIVE ─────────────────────────────────────── -->
-    <div class="panel" id="panel-rssm">
-
-      <p class="section-divider">P1 — RSSM Incentive (Chennai ₹5,250 / Rest ₹3,000)</p>
-      <div class="calc-card open" id="card-rssm-p1">
-        <div class="calc-header" onclick="toggleCard('card-rssm-p1')">
-          <div class="calc-icon" style="background:#F0FDF4;"><svg viewBox="0 0 24 24" style="stroke:#15803D"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
-          <div><div class="calc-title">RSSM P1 Incentive Calculator</div><div class="calc-sub">Measurement · EFOS · HHT Usage</div></div>
-          <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-        </div>
-        <div class="calc-body">
-          <div class="wl-select-row">
-            <label for="rssm-region">Region</label>
-            <select id="rssm-region" onchange="updateRSSMMax()">
-              <option value="3000">Rest of India — Max ₹3,000</option>
-              <option value="5250">Chennai (Non-3P) — Max ₹5,250</option>
-            </select>
-          </div>
-
-          <div class="param-block">
-            <div class="param-label">Measurement — Target vs Achievement<span class="param-wt">Weightage 50%</span></div>
-            <div class="field-grid">
-              <div class="field"><label>Target</label><input type="number" id="r1-tgt" placeholder="e.g. 500000" /></div>
-              <div class="field"><label>Achievement</label><input type="number" id="r1-ach" placeholder="e.g. 520000" /></div>
-            </div>
-          </div>
-          <div class="param-block">
-            <div class="param-label">EFOS (TN: min 25 bills · ROTN: min 20 bills)<span class="param-wt">Weightage 25%</span></div>
-            <div class="field-grid">
-              <div class="field"><label>EFOS Target (bills)</label><input type="number" id="r2-tgt" placeholder="e.g. 25" /></div>
-              <div class="field"><label>EFOS Achievement</label><input type="number" id="r2-ach" placeholder="e.g. 22" /></div>
-            </div>
-          </div>
-          <div class="param-block">
-            <div class="param-label">HHT Usage — Min 80% sales billing<span class="param-wt">Weightage 25%</span></div>
-            <div class="field-grid">
-              <div class="field"><label>HHT Target (%)</label><input type="number" id="r3-tgt" placeholder="80" /></div>
-              <div class="field"><label>HHT Achievement (%)</label><input type="number" id="r3-ach" placeholder="e.g. 85" /></div>
-            </div>
-          </div>
-          <button class="calc-btn" onclick="calcRSSMP1()">Calculate P1 Incentive</button>
-          <div class="result-grid" id="res-rssm-p1"></div>
-          <div class="download-bar" id="dl-rssm-p1">
-            <span class="download-label">Download</span>
-            <button class="dl-btn excel" onclick="dlExcel('res-rssm-p1','RSSM_P1')"><svg viewBox="0 0 24 24" stroke="#166534"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Excel</button>
-            <button class="dl-btn pdf"   onclick="dlPDF('res-rssm-p1','RSSM_P1')"><svg viewBox="0 0 24 24" stroke="#991B1B"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> PDF</button>
-            <button class="dl-btn jpg"   onclick="dlJPG('res-rssm-p1','RSSM_P1')"><svg viewBox="0 0 24 24" stroke="#92400E"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> JPG</button>
-            <button class="dl-btn png"   onclick="dlPNG('res-rssm-p1','RSSM_P1')"><svg viewBox="0 0 24 24" stroke="#5B21B6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> PNG</button>
-          </div>
-          <div class="tip">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            NOTE: HHT usage must be ≥80% for any incentive to be earned. Measurement slabs: ≥103%=100%, ≥99.6%=80%, ≥95%=60%
-          </div>
-        </div>
-      </div>
-
-      <p class="section-divider">P2 — Salesman Incentive (Total ₹3,000)</p>
-      <div class="calc-card" id="card-rssm-p2">
-        <div class="calc-header" onclick="toggleCard('card-rssm-p2')">
-          <div class="calc-icon" style="background:#FFF7ED;"><svg viewBox="0 0 24 24" style="stroke:#B45309"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
-          <div><div class="calc-title">P2 Salesman Incentive Calculator</div><div class="calc-sub">RTD+Biscuits Value · RTD ECO · Biscuit ECO</div></div>
-          <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-        </div>
-        <div class="calc-body">
-          <div class="param-block">
-            <div class="param-label">RTD + Biscuits Value — Target vs Achievement<span class="param-wt">Weightage 50%</span></div>
-            <div class="field-grid">
-              <div class="field"><label>Target (₹)</label><input type="number" id="p2v-tgt" placeholder="e.g. 300000" /></div>
-              <div class="field"><label>Achievement (₹)</label><input type="number" id="p2v-ach" placeholder="e.g. 310000" /></div>
-            </div>
-          </div>
-          <div class="param-block">
-            <div class="param-label">RTD ECO — RS ECO Target<span class="param-wt">Weightage 25%</span></div>
-            <div class="field-grid">
-              <div class="field"><label>RTD ECO Target (%)</label><input type="number" id="p2rtd-tgt" placeholder="100" /></div>
-              <div class="field"><label>RTD ECO Achieved (%)</label><input type="number" id="p2rtd-ach" placeholder="e.g. 88" /></div>
-            </div>
-          </div>
-          <div class="param-block">
-            <div class="param-label">Biscuit ECO — RS ECO Target<span class="param-wt">Weightage 25%</span></div>
-            <div class="field-grid">
-              <div class="field"><label>Biscuit ECO Target (%)</label><input type="number" id="p2bis-tgt" placeholder="100" /></div>
-              <div class="field"><label>Biscuit ECO Achieved (%)</label><input type="number" id="p2bis-ach" placeholder="e.g. 79" /></div>
-            </div>
-          </div>
-          <button class="calc-btn" onclick="calcRSSMP2()">Calculate P2 Incentive</button>
-          <div class="result-grid" id="res-rssm-p2"></div>
-          <div class="download-bar" id="dl-rssm-p2">
-            <span class="download-label">Download</span>
-            <button class="dl-btn excel" onclick="dlExcel('res-rssm-p2','RSSM_P2')"><svg viewBox="0 0 24 24" stroke="#166534"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Excel</button>
-            <button class="dl-btn pdf"   onclick="dlPDF('res-rssm-p2','RSSM_P2')"><svg viewBox="0 0 24 24" stroke="#991B1B"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> PDF</button>
-            <button class="dl-btn jpg"   onclick="dlJPG('res-rssm-p2','RSSM_P2')"><svg viewBox="0 0 24 24" stroke="#92400E"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> JPG</button>
-            <button class="dl-btn png"   onclick="dlPNG('res-rssm-p2','RSSM_P2')"><svg viewBox="0 0 24 24" stroke="#5B21B6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> PNG</button>
-          </div>
-          <div class="tip">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            P2 is only applicable in P2 towns where P2 salesman are available. Value slabs: ≥103%=100%, ≥99.6%=80%, ≥95%=60%. ECO slabs: ≥100%=100%, ≥85%=80%, ≥75%=70%
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── RS CDT ──────────────────────────────────────────────── -->
-    <div class="panel" id="panel-cdt">
-      <div class="calc-card open" id="card-cdt">
-        <div class="calc-header" onclick="toggleCard('card-cdt')">
-          <div class="calc-icon" style="background:#FEF2F2;"><svg viewBox="0 0 24 24" style="stroke:#B91C1C"><path d="M3 3v18h18"/><polyline points="7 16 11 12 15 14 19 8"/></svg></div>
-          <div><div class="calc-title">RS CDT — Quarterly Channel Development Target</div><div class="calc-sub">Exclusive HTS/IBS RS · TN &amp; Rest of TN</div></div>
-          <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-        </div>
-        <div class="calc-body">
-          <div class="wl-select-row">
-            <label for="cdt-region">Region</label>
-            <select id="cdt-region">
-              <option value="tn">TN (Chennai)</option>
-              <option value="rotn">Rest of TN</option>
-            </select>
-          </div>
-
-          <div class="param-block">
-            <div class="param-label">Secondary Sales — Quarterly Achievement</div>
-            <div class="field-grid">
-              <div class="field"><label>Quarterly Target (₹)</label><input type="number" id="cdt-sec-tgt" placeholder="e.g. 1000000" /></div>
-              <div class="field"><label>Quarterly Achievement (₹)</label><input type="number" id="cdt-sec-ach" placeholder="e.g. 1020000" /></div>
-            </div>
-          </div>
-
-          <div class="param-block">
-            <div class="param-label" id="cdt-p2-label">3R + Topstar Value (TN) — Quarterly Achievement</div>
-            <div class="field-grid">
-              <div class="field"><label>Target (₹)</label><input type="number" id="cdt-p2-tgt" placeholder="e.g. 500000" /></div>
-              <div class="field"><label>Achievement (₹)</label><input type="number" id="cdt-p2-ach" placeholder="e.g. 515000" /></div>
-            </div>
-          </div>
-
-          <button class="calc-btn" onclick="calcCDT()">Calculate CDT Payout Rate</button>
-          <div class="result-grid" id="res-cdt"></div>
-          <div class="download-bar" id="dl-cdt">
-            <span class="download-label">Download</span>
-            <button class="dl-btn excel" onclick="dlExcel('res-cdt','RS_CDT')"><svg viewBox="0 0 24 24" stroke="#166534"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Excel</button>
-            <button class="dl-btn pdf"   onclick="dlPDF('res-cdt','RS_CDT')"><svg viewBox="0 0 24 24" stroke="#991B1B"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> PDF</button>
-            <button class="dl-btn jpg"   onclick="dlJPG('res-cdt','RS_CDT')"><svg viewBox="0 0 24 24" stroke="#92400E"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> JPG</button>
-            <button class="dl-btn png"   onclick="dlPNG('res-cdt','RS_CDT')"><svg viewBox="0 0 24 24" stroke="#5B21B6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> PNG</button>
-          </div>
-
-          <div class="tip">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            Secondary Sales slabs: ≥98%=0.05%, ≥100%=0.10%, ≥102%=0.15% of achievement. 3R+Topstar/Tea Vol slabs: ≥95%=0.05%, ≥100%=0.075%, ≥103%=0.10% of achievement. Payout based on quarterly MOC achievement.
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div><!-- end hts-section -->
-</main>
-
-<script>
-// ── Navigation ─────────────────────────────────────────────
-function showHTS() {
-  document.getElementById('landing').style.display = 'none';
-  const s = document.getElementById('hts-section');
-  s.classList.add('show');
-  document.getElementById('backBtn').style.display = 'flex';
-}
-function showLanding() {
-  document.getElementById('landing').style.display = '';
-  const s = document.getElementById('hts-section');
-  s.classList.remove('show');
-  document.getElementById('backBtn').style.display = 'none';
-}
-
-// ── Tabs ───────────────────────────────────────────────────
-document.querySelectorAll('.tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
-  });
-});
-
-// ── Accordion ──────────────────────────────────────────────
-function toggleCard(id) {
-  const c = document.getElementById(id);
-  c.classList.toggle('open');
-}
-
-// ── CDT label update ───────────────────────────────────────
-document.getElementById('cdt-region').addEventListener('change', function() {
-  document.getElementById('cdt-p2-label').textContent =
-    this.value === 'tn' ? '3R + Topstar Value (TN) — Quarterly Achievement'
-                        : 'Tea Volume (Rest of TN) — Quarterly Achievement';
-});
-
-// ── Helpers ────────────────────────────────────────────────
-const v   = id => parseFloat(document.getElementById(id).value) || 0;
-const pct = (ach, tgt) => tgt > 0 ? (ach / tgt) * 100 : 0;
-const fmt  = (n, d=2) => isNaN(n)||!isFinite(n) ? '—' : n.toLocaleString('en-IN',{minimumFractionDigits:d,maximumFractionDigits:d});
-const fmtR = n => '₹' + fmt(n, 0);
-const fmtP = n => fmt(n) + '%';
-
-// Store last results for download
-const _lastResults = {};
-
-function renderResults(id, items) {
-  const el = document.getElementById(id);
-  el.innerHTML = items.map(({label, value, unit, type='neutral'}) => `
-    <div class="result-card ${type}">
-      <div class="result-label">${label}</div>
-      <div class="result-value">${value}</div>
-      ${unit ? `<div class="result-unit">${unit}</div>` : ''}
-    </div>`).join('');
-  requestAnimationFrame(() => {
-    el.querySelectorAll('.result-card').forEach((c,i) =>
-      setTimeout(() => c.classList.add('show'), i * 55));
-  });
-  // Store and show download bar
-  _lastResults[id] = items;
-  const dlBar = document.getElementById('dl-' + id.replace('res-',''));
-  if (dlBar) dlBar.classList.add('show');
-}
-
-// ── DOWNLOAD FUNCTIONS ──────────────────────────────────────
-
-function dlExcel(resultId, filename) {
-  const items = _lastResults[resultId];
-  if (!items || !items.length) return;
-
-  const typeColor = {
-    positive: { bg: '22C55E', fg: '14532D' },
-    negative: { bg: 'EF4444', fg: '7F1D1D' },
-    warning:  { bg: 'F59E0B', fg: '78350F' },
-    neutral:  { bg: '3B82F6', fg: '1E3A8A' },
-    payout:   { bg: '0369A1', fg: 'FFFFFF' },
-  };
-
-  // Build rows
-  const titleRow  = ['HTS 2026 — ' + filename.replace(/_/g,' '), '', ''];
-  const dateRow   = ['Generated: ' + new Date().toLocaleString('en-IN'), '', ''];
-  const blankRow  = ['', '', ''];
-  const headerRow = ['PARAMETER', 'VALUE', 'UNIT'];
-  const dataRows  = items.map(i => [i.label, i.value, i.unit || '']);
-
-  const aoa = [titleRow, dateRow, blankRow, headerRow, ...dataRows];
-  const ws  = XLSX.utils.aoa_to_sheet(aoa);
-
-  ws['!cols'] = [{wch:32},{wch:22},{wch:18}];
-  ws['!rows'] = [{hpt:26},{hpt:16},{hpt:10},{hpt:20},...items.map(()=>({hpt:22}))];
-
-  // Title style
-  ws['A1'].s = {
-    font:  { bold: true, sz: 16, color: { rgb: 'FFFFFF' } },
-    fill:  { fgColor: { rgb: '0369A1' } },
-    alignment: { vertical: 'center' }
-  };
-  ws['B1'].s = ws['C1'].s = { fill: { fgColor: { rgb: '0369A1' } } };
-
-  // Date row
-  ['A2','B2','C2'].forEach(cell => {
-    if (!ws[cell]) ws[cell] = { t:'s', v:'' };
-    ws[cell].s = { font: { sz:9, italic:true, color:{rgb:'555555'} }, fill: { fgColor:{rgb:'E0F2FE'} } };
-  });
-  ws['A2'].v = dateRow[0];
-
-  // Header row (row 4)
-  ['A4','B4','C4'].forEach((cell,i) => {
-    ws[cell].s = {
-      font:  { bold: true, sz:10, color:{ rgb:'FFFFFF' } },
-      fill:  { fgColor:{ rgb:'1E3A8A' } },
-      alignment: { horizontal:'center', vertical:'center' },
-      border: { bottom:{ style:'medium', color:{rgb:'BFDBFE'} } }
-    };
-  });
-
-  // Data rows (row 5 onwards)
-  items.forEach((item, i) => {
-    const row   = i + 5;
-    const tc    = typeColor[item.type] || typeColor.neutral;
-    const isAlt = i % 2 === 0;
-    const bg    = isAlt ? 'F8FAFC' : 'FFFFFF';
-
-    const cellA = XLSX.utils.encode_cell({r: row-1, c:0});
-    const cellB = XLSX.utils.encode_cell({r: row-1, c:1});
-    const cellC = XLSX.utils.encode_cell({r: row-1, c:2});
-
-    ws[cellA].s = {
-      font:  { sz:9, color:{ rgb:'0F172A' } },
-      fill:  { fgColor:{ rgb: bg } },
-      alignment: { vertical:'center' }
-    };
-    ws[cellB].s = {
-      font:  { bold:true, sz:11, color:{ rgb: tc.fg } },
-      fill:  { fgColor:{ rgb: tc.bg + '22' } },
-      alignment: { horizontal:'center', vertical:'center' }
-    };
-    ws[cellC].s = {
-      font:  { sz:8, color:{ rgb:'868E96' }, italic:true },
-      fill:  { fgColor:{ rgb: bg } },
-      alignment: { vertical:'center' }
+    const number = (id) => {
+      const n = Number($(id).value);
+      return Number.isFinite(n) ? Math.max(0, n) : 0;
     };
 
-    // Payout row gets full highlight
-    if (item.type === 'payout') {
-      [cellA, cellB, cellC].forEach(cell => {
-        ws[cell].s.fill = { fgColor:{ rgb:'0369A1' } };
-        ws[cell].s.font = { ...ws[cell].s.font, bold:true, color:{ rgb:'FFFFFF' } };
+    function calculatePlan() {
+      const dailyBoxes = number("dailyBoxes");
+      const packSize = number("packSize");
+      const yieldTray = number("yieldTray");
+      const cycleDays = number("cycleDays");
+      const sellPrice = number("sellPrice");
+      const directCost = number("directCost");
+      const workingDays = number("workingDays");
+
+      if (!dailyBoxes || !packSize || !yieldTray || !cycleDays || !workingDays) {
+        showToast("Please enter valid production values.");
+        return;
+      }
+
+      const dailyGrams = dailyBoxes * packSize;
+      const traysPerDay = dailyGrams / yieldTray;
+      const traysInCycle = traysPerDay * cycleDays;
+      const monthlyBoxes = dailyBoxes * workingDays;
+      const monthlyRevenue = monthlyBoxes * sellPrice;
+      const monthlyDirectCost = monthlyBoxes * directCost;
+      const monthlyContribution = monthlyRevenue - monthlyDirectCost;
+      const contributionMargin = sellPrice > 0 ? ((sellPrice - directCost) / sellPrice) * 100 : 0;
+
+      renderResults([
+        ["Trays / day", traysPerDay.toFixed(1), "active harvest equivalent"],
+        ["Trays in cycle", Math.ceil(traysInCycle), "production capacity"],
+        ["Monthly boxes", Math.round(monthlyBoxes).toLocaleString("en-IN"), "packs"],
+        ["Monthly sales", currency(monthlyRevenue), "revenue"],
+        ["Direct cost", currency(monthlyDirectCost), "estimated"],
+        ["Contribution", currency(monthlyContribution), "before overheads", true],
+        ["Margin", contributionMargin.toFixed(1) + "%", "contribution margin"],
+        ["Fresh weight/day", dailyGrams.toLocaleString("en-IN") + " g", "harvest requirement"],
+        ["Fresh weight/month", (dailyGrams * workingDays / 1000).toFixed(1) + " kg", "harvest requirement"]
+      ]);
+    }
+
+    function renderResults(items) {
+      $("results").innerHTML = items.map(([label, value, unit, highlight]) => `
+        <div class="result ${highlight ? "highlight" : ""}">
+          <small>${label}</small>
+          <strong>${value}</strong>
+          <em>${unit}</em>
+        </div>
+      `).join("");
+    }
+
+    function resetCalculator() {
+      $("dailyBoxes").value = 30;
+      $("packSize").value = 50;
+      $("yieldTray").value = 250;
+      $("cycleDays").value = 7;
+      $("sellPrice").value = 60;
+      $("directCost").value = 35;
+      $("workingDays").value = 30;
+      calculatePlan();
+    }
+
+    function showToast(message) {
+      const toast = $("toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => toast.classList.remove("show"), 2600);
+    }
+
+    $("calculateBtn").addEventListener("click", calculatePlan);
+    $("resetBtn").addEventListener("click", resetCalculator);
+
+    document.querySelectorAll(".calc-card input").forEach(input => {
+      input.addEventListener("input", calculatePlan);
+    });
+
+    document.querySelectorAll(".add-btn").forEach(button => {
+      button.addEventListener("click", () => {
+        showToast(`${button.dataset.product} added to your enquiry.`);
       });
-    }
-  });
+    });
 
-  // Merge title across columns
-  ws['!merges'] = [
-    { s:{r:0,c:0}, e:{r:0,c:2} },
-    { s:{r:1,c:0}, e:{r:1,c:2} },
-    { s:{r:2,c:0}, e:{r:2,c:2} },
-  ];
+    $("orderBtn").addEventListener("click", () => {
+      showToast("Order flow ready — connect this button to WhatsApp, your order form or checkout.");
+    });
 
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, filename.slice(0,31));
-  XLSX.writeFile(wb, filename + '_' + _dateStr() + '.xlsx');
-}
+    $("menuBtn").addEventListener("click", () => {
+      $("navLinks").classList.toggle("open");
+    });
 
-function dlPDF(resultId, filename) {
-  const items = _lastResults[resultId];
-  if (!items || !items.length) return;
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-  const title = 'HTS 2026 — ' + filename.replace(/_/g,' ');
-  const date  = 'Generated: ' + new Date().toLocaleString('en-IN');
+    document.querySelectorAll(".nav-links a").forEach(link => {
+      link.addEventListener("click", () => $("navLinks").classList.remove("open"));
+    });
 
-  // Gradient-style header band
-  doc.setFillColor(3, 105, 161);
-  doc.rect(0, 0, 210, 32, 'F');
-  doc.setFillColor(28, 78, 216);
-  doc.rect(150, 0, 60, 32, 'F');
-
-  // Logo block
-  doc.setFillColor(255,255,255);
-  doc.roundedRect(12, 7, 18, 18, 3, 3, 'F');
-  doc.setFillColor(3, 105, 161);
-  doc.setFontSize(11); doc.setFont('helvetica','bold');
-  doc.setTextColor(3,105,161);
-  doc.text('HTS', 15, 19);
-
-  doc.setTextColor(255,255,255);
-  doc.setFontSize(14); doc.setFont('helvetica','bold');
-  doc.text(title, 35, 14);
-  doc.setFontSize(8.5); doc.setFont('helvetica','normal');
-  doc.setTextColor(186,230,253);
-  doc.text(date, 35, 23);
-
-  // Sub-header bar
-  doc.setFillColor(30, 58, 138);
-  doc.rect(0, 32, 210, 10, 'F');
-  doc.setTextColor(255,255,255);
-  doc.setFontSize(7.5); doc.setFont('helvetica','bold');
-  doc.text('PARAMETER', 14, 39);
-  doc.text('VALUE', 118, 39);
-  doc.text('UNIT', 163, 39);
-
-  // Color map per type
-  const rowColors = {
-    positive: { bg:[220,252,231], val:[21,128,61],   label:[15,23,42] },
-    negative: { bg:[254,226,226], val:[185,28,28],   label:[15,23,42] },
-    warning:  { bg:[254,243,199], val:[146,64,14],   label:[15,23,42] },
-    neutral:  { bg:[239,246,255], val:[28,78,216],   label:[15,23,42] },
-    payout:   { bg:[3,105,161],   val:[255,255,255], label:[186,230,253] },
-  };
-
-  let y = 50;
-  const rowH = 12;
-
-  items.forEach((item, i) => {
-    if (y + rowH > 275) {
-      doc.addPage();
-      doc.setFillColor(30,58,138); doc.rect(0,0,210,10,'F');
-      doc.setTextColor(255,255,255); doc.setFontSize(7.5); doc.setFont('helvetica','bold');
-      doc.text('PARAMETER',14,7); doc.text('VALUE',118,7); doc.text('UNIT',163,7);
-      y = 18;
-    }
-
-    const c = rowColors[item.type] || rowColors.neutral;
-    doc.setFillColor(...c.bg);
-    doc.rect(10, y - 6, 190, rowH, 'F');
-
-    // Left border accent
-    doc.setFillColor(...c.val);
-    doc.rect(10, y - 6, 3, rowH, 'F');
-
-    // Param label
-    doc.setFontSize(9); doc.setFont('helvetica','normal');
-    doc.setTextColor(...c.label);
-    doc.text(String(item.label), 16, y);
-
-    // Value — larger, bold, colored
-    doc.setFontSize(11); doc.setFont('helvetica','bold');
-    doc.setTextColor(...c.val);
-    doc.text(String(item.value), 118, y);
-
-    // Unit
-    doc.setFontSize(7.5); doc.setFont('helvetica','normal');
-    doc.setTextColor(...(item.type==='payout'?[186,230,253]:[134,142,150]));
-    doc.text(String(item.unit||''), 163, y);
-
-    // Row separator
-    doc.setDrawColor(220,220,220);
-    doc.line(10, y + rowH - 6, 200, y + rowH - 6);
-
-    y += rowH;
-  });
-
-  // Footer
-  doc.setFillColor(248,249,250);
-  doc.rect(0, 280, 210, 17, 'F');
-  doc.setFontSize(7.5); doc.setFont('helvetica','normal');
-  doc.setTextColor(134,142,150);
-  doc.text('HTS 2026 Parameter Calculator  |  Internal Use Only', 14, 289);
-  doc.setTextColor(28,78,216);
-  doc.text('Page ' + doc.internal.getCurrentPageInfo().pageNumber, 185, 289);
-
-  doc.save(filename + '_' + _dateStr() + '.pdf');
-}
-
-async function dlJPG(resultId, filename) {
-  await _dlImage(resultId, filename, 'jpg');
-}
-async function dlPNG(resultId, filename) {
-  await _dlImage(resultId, filename, 'png');
-}
-
-async function _dlImage(resultId, filename, fmt) {
-  const items = _lastResults[resultId] || [];
-  if (!items.length) return;
-
-  const bgMap = {
-    positive: { card:'#F0FDF4', val:'#15803D', border:'#86EFAC' },
-    negative: { card:'#FEF2F2', val:'#B91C1C', border:'#FCA5A5' },
-    warning:  { card:'#FFFBEB', val:'#B45309', border:'#FDE68A' },
-    neutral:  { card:'#EFF6FF', val:'#1C4ED8', border:'#BFDBFE' },
-    payout:   { card:'#0369A1', val:'#FFFFFF', border:'#0284C7' },
-  };
-
-  const wrap = document.createElement('div');
-  wrap.style.cssText = [
-    'position:fixed;left:-9999px;top:0;',
-    'background:linear-gradient(135deg,#F8FAFC 0%,#EFF6FF 100%);',
-    'padding:28px;border-radius:16px;',
-    'font-family:IBM Plex Sans,Arial,sans-serif;width:660px;',
-    'box-shadow:0 8px 32px rgba(0,0,0,0.18);'
-  ].join('');
-
-  // Header
-  const hdr = document.createElement('div');
-  hdr.style.cssText = [
-    'background:linear-gradient(135deg,#0369A1,#1C4ED8);',
-    'border-radius:12px;padding:18px 22px;margin-bottom:20px;',
-    'display:flex;align-items:center;gap:14px;'
-  ].join('');
-  hdr.innerHTML = `
-    <div style="background:rgba(255,255,255,0.2);border-radius:10px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-      <span style="font-size:22px;font-weight:900;color:#fff;letter-spacing:-1px;">H</span>
-    </div>
-    <div>
-      <div style="font-size:16px;font-weight:700;color:#fff;letter-spacing:-0.3px;">HTS 2026 — ${filename.replace(/_/g,' ')}</div>
-      <div style="font-size:11px;color:#BAE6FD;margin-top:3px;">${new Date().toLocaleString('en-IN')}</div>
-    </div>`;
-  wrap.appendChild(hdr);
-
-  // Cards grid
-  const grid = document.createElement('div');
-  const cols = items.length <= 4 ? 2 : 3;
-  grid.style.cssText = `display:grid;grid-template-columns:repeat(${cols},1fr);gap:12px;`;
-
-  items.forEach(item => {
-    const t = item.type || 'neutral';
-    const c = bgMap[t] || bgMap.neutral;
-    const isPayout = t === 'payout';
-    const card = document.createElement('div');
-    card.style.cssText = [
-      `background:${c.card};`,
-      `border:1.5px solid ${c.border};`,
-      'border-radius:10px;padding:14px 16px;',
-      isPayout ? 'grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;' : ''
-    ].join('');
-
-    if (isPayout) {
-      card.innerHTML = `
-        <div style="font-size:11px;font-weight:700;color:${isPayout?'#BAE6FD':'#6B7280'};text-transform:uppercase;letter-spacing:.07em;">${item.label}</div>
-        <div style="display:flex;align-items:baseline;gap:6px;">
-          <div style="font-size:28px;font-weight:800;color:${c.val};letter-spacing:-1px;">${item.value}</div>
-          ${item.unit?`<div style="font-size:11px;color:${isPayout?'#BAE6FD':'#9CA3AF'};">${item.unit}</div>`:''}
-        </div>`;
-    } else {
-      card.innerHTML = `
-        <div style="font-size:10px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;">${item.label}</div>
-        <div style="font-size:22px;font-weight:800;color:${c.val};letter-spacing:-0.5px;line-height:1.1;">${item.value}</div>
-        ${item.unit?`<div style="font-size:10px;color:#9CA3AF;margin-top:4px;">${item.unit}</div>`:''}`;
-    }
-    grid.appendChild(card);
-  });
-  wrap.appendChild(grid);
-
-  // Footer
-  const foot = document.createElement('div');
-  foot.style.cssText = 'margin-top:16px;padding-top:12px;border-top:1px solid #E2E8F0;display:flex;justify-content:space-between;align-items:center;';
-  foot.innerHTML = `
-    <span style="font-size:10px;color:#94A3B8;">HTS 2026 Parameter Calculator · Internal Use Only</span>
-    <span style="font-size:10px;font-weight:600;color:#1C4ED8;">© ${new Date().getFullYear()}</span>`;
-  wrap.appendChild(foot);
-
-  document.body.appendChild(wrap);
-  try {
-    const canvas = await html2canvas(wrap, { scale: 2.5, backgroundColor: null, useCORS: true, logging: false });
-    const link = document.createElement('a');
-    const mimeType = fmt === 'png' ? 'image/png' : 'image/jpeg';
-    const quality  = fmt === 'png' ? 1 : 0.96;
-    link.download = filename + '_' + _dateStr() + '.' + fmt;
-    link.href = canvas.toDataURL(mimeType, quality);
-    link.click();
-  } finally {
-    document.body.removeChild(wrap);
-  }
-}
-
-function _dateStr() {
-  const d = new Date();
-  return d.getFullYear() + ('0'+(d.getMonth()+1)).slice(-2) + ('0'+d.getDate()).slice(-2);
-}
-
-// Score helpers
-function scoreP1(p) { // MGP & RTD — >=103=5, >=100=4, >=97=3, else 0
-  return p >= 103 ? 5 : p >= 100 ? 4 : p >= 97 ? 3 : 0;
-}
-function scoreP2(p) { // Growing OIs — >=95=5, >=85=4, >=75=3, else 0
-  return p >= 95 ? 5 : p >= 85 ? 4 : p >= 75 ? 3 : 0;
-}
-function scoreCoverage(p) { // 100%=5, >=90=4, >=80=3, else 0
-  return p >= 100 ? 5 : p >= 90 ? 4 : p >= 80 ? 3 : 0;
-}
-function scorePerfectStore(p) { // >=85=5, >=75=4, >=65=3, else 0
-  return p >= 85 ? 5 : p >= 75 ? 4 : p >= 65 ? 3 : 0;
-}
-function scoreQGP(p) { // >=103=5, >=100=4, >=97=3, else 0
-  return p >= 103 ? 5 : p >= 100 ? 4 : p >= 97 ? 3 : 0;
-}
-function scoreEFOSHHT(p) { // >=100=5, >=90=4, >=80=3, else 0
-  return p >= 100 ? 5 : p >= 90 ? 4 : p >= 80 ? 3 : 0;
-}
-function payoutPct(score) { // score -> payout %
-  return score >= 5 ? 1 : score >= 4 ? 0.8 : score >= 3 ? 0.6 : 0;
-}
-
-// ── PRP PAYOUT ─────────────────────────────────────────────
-function calcPRP() {
-  const maxPayout = v('prp-wl');
-  const p1Pct = pct(v('p1-ach'), v('p1-tgt'));
-  const p2Pct = pct(v('p2-ach'), v('p2-tgt'));
-  const p3aPct = pct(v('p3a-ach'), v('p3a-tgt'));
-  const p3bPct = pct(v('p3b-ach'), v('p3b-tgt'));
-
-  const s1 = scoreP1(p1Pct);
-  const s2 = scoreP2(p2Pct);
-  const s3a = scoreCoverage(p3aPct);
-  const s3b = scoreP1(p3bPct);
-
-  const p1Payout  = maxPayout * 0.40 * payoutPct(s1);
-  const p2Payout  = maxPayout * 0.20 * payoutPct(s2);
-  const p3aPayout = maxPayout * 0.20 * payoutPct(s3a);
-  const p3bPayout = maxPayout * 0.20 * payoutPct(s3b);
-  const total     = p1Payout + p2Payout + p3aPayout + p3bPayout;
-
-  renderResults('res-prp', [
-    { label: 'P1 % Ach', value: fmtP(p1Pct),  type: p1Pct>=103?'positive':p1Pct>=97?'neutral':'negative' },
-    { label: 'P2 % Ach', value: fmtP(p2Pct),  type: p2Pct>=95?'positive':p2Pct>=75?'neutral':'negative' },
-    { label: 'P3a % Ach',value: fmtP(p3aPct), type: p3aPct>=100?'positive':p3aPct>=80?'neutral':'negative' },
-    { label: 'P3b % Ach',value: fmtP(p3bPct), type: p3bPct>=103?'positive':p3bPct>=97?'neutral':'negative' },
-    { label: 'P1 Payout', value: fmtR(p1Payout),  type: s1>=4?'positive':s1>=3?'warning':'negative' },
-    { label: 'P2 Payout', value: fmtR(p2Payout),  type: s2>=4?'positive':s2>=3?'warning':'negative' },
-    { label: 'P3 Payout', value: fmtR(p3aPayout+p3bPayout), type: (s3a+s3b)>=6?'positive':'warning' },
-    { label: 'TOTAL PAYOUT', value: fmtR(total), unit: `of max ${fmtR(maxPayout)}`, type: 'payout' },
-  ]);
-}
-
-// ── QPB ────────────────────────────────────────────────────
-function calcQPB() {
-  const maxPayout = v('qpb-wl');
-  const p1Pct = pct(v('q1-ach'), v('q1-tgt'));
-  const p2Pct = pct(v('q2-ach'), v('q2-tgt'));
-  const p3Pct = pct(v('q3-ach'), v('q3-tgt'));
-
-  const s1 = scoreQGP(p1Pct);
-  // Volume: >=103=5, >=100=4, >=97=3, >=95=2, else 0
-  const s2 = p2Pct>=103?5:p2Pct>=100?4:p2Pct>=97?3:p2Pct>=95?2:0;
-  const s3 = scorePerfectStore(p3Pct);
-
-  const pp2 = s2>=5?1:s2>=4?0.8:s2>=3?0.6:s2>=2?0.4:0;
-  const p1Pay = maxPayout * 0.40 * payoutPct(s1);
-  const p2Pay = maxPayout * 0.40 * pp2;
-  const p3Pay = maxPayout * 0.20 * payoutPct(s3);
-  const total = p1Pay + p2Pay + p3Pay;
-
-  renderResults('res-qpb', [
-    { label: 'Value % Ach',   value: fmtP(p1Pct),  type: p1Pct>=103?'positive':p1Pct>=97?'neutral':'negative' },
-    { label: 'Volume % Ach',  value: fmtP(p2Pct),  type: p2Pct>=103?'positive':p2Pct>=95?'neutral':'negative' },
-    { label: 'Perf Store %',  value: fmtP(p3Pct),  type: p3Pct>=85?'positive':p3Pct>=65?'neutral':'negative' },
-    { label: 'Value Payout',  value: fmtR(p1Pay),  type: s1>=4?'positive':'warning' },
-    { label: 'Volume Payout', value: fmtR(p2Pay),  type: s2>=4?'positive':'warning' },
-    { label: 'Perf Store Pay',value: fmtR(p3Pay),  type: s3>=4?'positive':'warning' },
-    { label: 'TOTAL QPB', value: fmtR(total), unit: `of max ${fmtR(maxPayout)}`, type: 'payout' },
-  ]);
-}
-
-// ── WPG FF ─────────────────────────────────────────────────
-function calcWPGFF() {
-  const qgpPct  = pct(v('ff-qgp-ach'), v('ff-qgp-tgt'));
-  const volPct  = pct(v('ff-vol-ach'), v('ff-vol-tgt'));
-  const efosPct = pct(v('ff-efos-ach'), v('ff-efos-tgt'));
-  const hhtPct  = pct(v('ff-hht-ach'), v('ff-hht-tgt'));
-
-  const sQGP  = scoreQGP(qgpPct);
-  const sVol  = scoreQGP(volPct);
-  const sEFOS = scoreEFOSHHT(efosPct);
-  const sHHT  = scoreEFOSHHT(hhtPct);
-
-  const wpgScore = (sQGP*0.3 + sVol*0.3 + sEFOS*0.2 + sHHT*0.2);
-
-  renderResults('res-wpg-ff', [
-    { label: 'QGP % Ach',    value: fmtP(qgpPct),  type: qgpPct>=103?'positive':qgpPct>=97?'neutral':'negative' },
-    { label: 'Volume % Ach', value: fmtP(volPct),  type: volPct>=103?'positive':volPct>=97?'neutral':'negative' },
-    { label: 'EFOS % Ach',   value: fmtP(efosPct), type: efosPct>=100?'positive':efosPct>=80?'neutral':'negative' },
-    { label: 'HHT % Ach',    value: fmtP(hhtPct),  type: hhtPct>=100?'positive':hhtPct>=80?'neutral':'negative' },
-    { label: 'QGP Score',    value: fmt(sQGP,0)+'/5',  type: sQGP>=4?'positive':sQGP>=3?'neutral':'negative' },
-    { label: 'Vol Score',    value: fmt(sVol,0)+'/5',  type: sVol>=4?'positive':sVol>=3?'neutral':'negative' },
-    { label: 'EFOS Score',   value: fmt(sEFOS,0)+'/5', type: sEFOS>=4?'positive':sEFOS>=3?'neutral':'negative' },
-    { label: 'WPG SCORE',    value: fmt(wpgScore,2)+'/5', unit: 'Weighted Average', type: 'payout' },
-  ]);
-}
-
-// ── WPG ASM ────────────────────────────────────────────────
-function calcWPGASM() {
-  const qgpPct = pct(v('asm-qgp-ach'), v('asm-qgp-tgt'));
-  const tvPct  = pct(v('asm-tv-ach'),  v('asm-tv-tgt'));
-  const psPct  = v('asm-ps-ach');  // entered directly as %
-  const ecoPct = pct(v('asm-eco-ach'), v('asm-eco-tgt'));
-
-  const sQGP = scoreQGP(qgpPct);
-  // Tea Value: >=103=5, >=99.6=4, >=97=3, >=95=2, else 0
-  const sTV  = tvPct>=103?5:tvPct>=99.6?4:tvPct>=97?3:tvPct>=95?2:0;
-  // Perfect Store: >=85=5, >=75=4, >=65=3
-  const sPS  = psPct>=85?5:psPct>=75?4:psPct>=65?3:0;
-  // ECO: >=100=5, >=95=4, >=90=3
-  const sECO = ecoPct>=100?5:ecoPct>=95?4:ecoPct>=90?3:0;
-
-  const wpgScore = sQGP*0.4 + sTV*0.3 + sPS*0.2 + sECO*0.1;
-
-  renderResults('res-wpg-asm', [
-    { label: 'QGP % Ach',     value: fmtP(qgpPct), type: qgpPct>=103?'positive':qgpPct>=97?'neutral':'negative' },
-    { label: 'Tea Val % Ach', value: fmtP(tvPct),  type: tvPct>=103?'positive':tvPct>=97?'neutral':'negative' },
-    { label: 'Perf Store %',  value: fmtP(psPct),  type: psPct>=85?'positive':psPct>=65?'neutral':'negative' },
-    { label: 'ECO % Ach',     value: fmtP(ecoPct), type: ecoPct>=100?'positive':ecoPct>=90?'neutral':'negative' },
-    { label: 'QGP Score',     value: fmt(sQGP,0)+'/5', type: sQGP>=4?'positive':'neutral' },
-    { label: 'Tea Val Score', value: fmt(sTV,0)+'/5',  type: sTV>=4?'positive':'neutral' },
-    { label: 'PS Score',      value: fmt(sPS,0)+'/5',  type: sPS>=4?'positive':'neutral' },
-    { label: 'WPG SCORE',     value: fmt(wpgScore,2)+'/5', unit: 'Weighted Average', type: 'payout' },
-  ]);
-}
-
-// ── RSSM P1 ────────────────────────────────────────────────
-function calcRSSMP1() {
-  const maxPayout = v('rssm-region');
-  const measPct = pct(v('r1-ach'), v('r1-tgt'));
-  const efosPct = pct(v('r2-ach'), v('r2-tgt'));
-  const hhtPct  = pct(v('r3-ach'), v('r3-tgt'));
-
-  // HHT must be >=80% for any payout
-  if (hhtPct < 80) {
-    renderResults('res-rssm-p1', [
-      { label: 'HHT Achievement', value: fmtP(hhtPct), type: 'negative' },
-      { label: 'TOTAL INCENTIVE', value: '₹0', unit: 'HHT < 80% — No payout', type: 'negative' },
-    ]);
-    return;
-  }
-
-  // Measurement: >=103=100%, >=99.6=80%, >=95=60%
-  const measPayPct = measPct>=103?1:measPct>=99.6?0.8:measPct>=95?0.6:0;
-  // EFOS: >=90=100%, >=75=80%
-  const efosPayPct = efosPct>=90?1:efosPct>=75?0.8:0;
-  // HHT: >=90=100%, >=80=80%
-  const hhtPayPct  = hhtPct>=90?1:hhtPct>=80?0.8:0;
-
-  const measAmt = maxPayout * 0.50 * measPayPct;
-  const efosAmt = maxPayout * 0.25 * efosPayPct;
-  const hhtAmt  = maxPayout * 0.25 * hhtPayPct;
-  const total   = measAmt + efosAmt + hhtAmt;
-
-  renderResults('res-rssm-p1', [
-    { label: 'Meas % Ach',    value: fmtP(measPct), type: measPct>=103?'positive':measPct>=95?'neutral':'negative' },
-    { label: 'EFOS % Ach',    value: fmtP(efosPct), type: efosPct>=90?'positive':'warning' },
-    { label: 'HHT % Ach',     value: fmtP(hhtPct),  type: hhtPct>=90?'positive':'warning' },
-    { label: 'Meas Payout',   value: fmtR(measAmt), type: measPayPct>=1?'positive':'warning' },
-    { label: 'EFOS Payout',   value: fmtR(efosAmt), type: efosPayPct>=1?'positive':'warning' },
-    { label: 'HHT Payout',    value: fmtR(hhtAmt),  type: hhtPayPct>=1?'positive':'warning' },
-    { label: 'TOTAL INCENTIVE', value: fmtR(total), unit: `of max ${fmtR(maxPayout)}`, type: 'payout' },
-  ]);
-}
-
-// ── RSSM P2 ────────────────────────────────────────────────
-function calcRSSMP2() {
-  const maxPayout = 3000;
-  const valPct  = pct(v('p2v-ach'),   v('p2v-tgt'));
-  const rtdPct  = pct(v('p2rtd-ach'), v('p2rtd-tgt'));
-  const bisPct  = pct(v('p2bis-ach'), v('p2bis-tgt'));
-
-  const valPayPct = valPct>=103?1:valPct>=99.6?0.8:valPct>=95?0.6:0;
-  const rtdPayPct = rtdPct>=100?1:rtdPct>=85?0.8:rtdPct>=75?0.7:0;
-  const bisPayPct = bisPct>=100?1:bisPct>=85?0.8:bisPct>=75?0.7:0;
-
-  const valAmt = maxPayout * 0.50 * valPayPct;
-  const rtdAmt = maxPayout * 0.25 * rtdPayPct;
-  const bisAmt = maxPayout * 0.25 * bisPayPct;
-  const total  = valAmt + rtdAmt + bisAmt;
-
-  renderResults('res-rssm-p2', [
-    { label: 'Value % Ach',  value: fmtP(valPct),  type: valPct>=103?'positive':valPct>=95?'neutral':'negative' },
-    { label: 'RTD ECO %',    value: fmtP(rtdPct),  type: rtdPct>=100?'positive':rtdPct>=75?'neutral':'negative' },
-    { label: 'Biscuit ECO %',value: fmtP(bisPct),  type: bisPct>=100?'positive':bisPct>=75?'neutral':'negative' },
-    { label: 'Value Payout', value: fmtR(valAmt),  type: valPayPct>=1?'positive':'warning' },
-    { label: 'RTD Payout',   value: fmtR(rtdAmt),  type: rtdPayPct>=1?'positive':'warning' },
-    { label: 'TOTAL P2',     value: fmtR(total), unit: `of max ${fmtR(maxPayout)}`, type: 'payout' },
-  ]);
-}
-
-// ── RS CDT ─────────────────────────────────────────────────
-function calcCDT() {
-  const region   = document.getElementById('cdt-region').value;
-  const secTgt   = v('cdt-sec-tgt'), secAch = v('cdt-sec-ach');
-  const p2Tgt    = v('cdt-p2-tgt'),  p2Ach  = v('cdt-p2-ach');
-
-  const secPct = pct(secAch, secTgt);
-  const p2Pct  = pct(p2Ach,  p2Tgt);
-
-  // Secondary Sales payout rate
-  const secRate = secPct>=102?0.0015:secPct>=100?0.001:secPct>=98?0.0005:0;
-  // 3R+Topstar or Tea Volume payout rate
-  const p2Rate  = p2Pct>=103?0.001:p2Pct>=100?0.00075:p2Pct>=95?0.0005:0;
-
-  const secPayout = secAch * secRate;
-  const p2Payout  = p2Ach  * p2Rate;
-  const total     = secPayout + p2Payout;
-  const p2Label   = region === 'tn' ? '3R+Topstar Payout' : 'Tea Vol Payout';
-
-  renderResults('res-cdt', [
-    { label: 'Sec Sales % Ach', value: fmtP(secPct),      type: secPct>=102?'positive':secPct>=98?'neutral':'negative' },
-    { label: p2Label.replace(' Payout',' % Ach'), value: fmtP(p2Pct), type: p2Pct>=103?'positive':p2Pct>=95?'neutral':'negative' },
-    { label: 'Sec Sales Rate',  value: (secRate*100).toFixed(3)+'%', unit: 'of achievement', type: secRate>0?'neutral':'negative' },
-    { label: 'P2 Rate',         value: (p2Rate*100).toFixed(3)+'%', unit: 'of achievement', type: p2Rate>0?'neutral':'negative' },
-    { label: 'Sec Sales Pay',   value: fmtR(secPayout), type: secRate>=0.001?'positive':'warning' },
-    { label: p2Label,           value: fmtR(p2Payout),  type: p2Rate>=0.00075?'positive':'warning' },
-    { label: 'TOTAL CDT PAYOUT', value: fmtR(total), unit: 'Quarterly', type: 'payout' },
-  ]);
-}
-</script>
+    $("year").textContent = new Date().getFullYear();
+    calculatePlan();
+  </script>
 </body>
 </html>
